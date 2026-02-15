@@ -1,0 +1,7 @@
+{
+  "name": "Janngu Ɗemɗe",
+  "description": "A modern, mobile-first multi-language learning application starting with Pulaar, featuring proverbs, audio lessons, and interactive quizzes.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

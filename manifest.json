@@ -1,0 +1,21 @@
+{
+  "name": "Janngu Pulaar",
+  "short_name": "Janngu",
+  "description": "Apprenez le Pulaar avec des leçons interactives.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2d4156",
+  "theme_color": "#2d4156",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3898/3898082.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3898/3898082.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
