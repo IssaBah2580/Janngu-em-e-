@@ -43,6 +43,10 @@ export type UIStrings = {
   install_desc: string;
   install_btn: string;
   ios_install_hint: string;
+  donation_title: string;
+  donation_msg: string;
+  donation_btn: string;
+  close: string;
 };
 
 const translations: Record<string, UIStrings> = {
@@ -88,7 +92,11 @@ const translations: Record<string, UIStrings> = {
     install_app: "Installer l'application",
     install_desc: "Utilisez Janngu comme une application native sur votre écran d'accueil.",
     install_btn: "Installer maintenant",
-    ios_install_hint: "Sur iOS : Appuyez sur Partager, puis 'Sur l'écran d'accueil'"
+    ios_install_hint: "Sur iOS : Appuyez sur Partager, puis 'Sur l'écran d'accueil'",
+    donation_title: "Soutenez le Projet",
+    donation_msg: "Janngu est en plein développement. Votre don, même modeste, nous aide à créer plus de contenu gratuit pour la culture Pulaar.",
+    donation_btn: "Faire un don",
+    close: "Fermer"
   },
   en: {
     home: "Home",
@@ -132,7 +140,11 @@ const translations: Record<string, UIStrings> = {
     install_app: "Install App",
     install_desc: "Use Janngu like a native app on your home screen.",
     install_btn: "Install Now",
-    ios_install_hint: "On iOS: Tap Share, then 'Add to Home Screen'"
+    ios_install_hint: "On iOS: Tap Share, then 'Add to Home Screen'",
+    donation_title: "Support the Project",
+    donation_msg: "Janngu is under active development. Your contribution helps us create more free content for Pulaar culture.",
+    donation_btn: "Make a Donation",
+    close: "Close"
   },
   es: {
     home: "Inicio",
@@ -176,7 +188,11 @@ const translations: Record<string, UIStrings> = {
     install_app: "Instalar aplicación",
     install_desc: "Usa Janngu como una app nativa en tu pantalla de inicio.",
     install_btn: "Instalar ahora",
-    ios_install_hint: "En iOS: Toca Compartir, luego 'Añadir a pantalla de inicio'"
+    ios_install_hint: "En iOS: Toca Compartir, luego 'Añadir a pantalla de inicio'",
+    donation_title: "Apoya el Proyecto",
+    donation_msg: "Janngu está en pleno desarrollo. Tu donación nos ayuda a crear más contenido gratuito para la cultura Pulaar.",
+    donation_btn: "Hacer una donación",
+    close: "Cerrar"
   },
   ar: {
     home: "الرئيسية",
@@ -220,7 +236,11 @@ const translations: Record<string, UIStrings> = {
     install_app: "تثبيت التطبيق",
     install_desc: "استخدم Janngu كتطبيق أصلي على شاشتك الرئيسية.",
     install_btn: "تثبيت الآن",
-    ios_install_hint: "على iOS: اضغط على مشاركة، ثم 'إضافة إلى الشاشة الرئيسية'"
+    ios_install_hint: "على iOS: اضغط على مشاركة، ثم 'إضافة إلى الشاشة الرئيسية'",
+    donation_title: "ادعم المشروع",
+    donation_msg: "جانغو قيد التطوير النشط. تساعدنا مساهمتك في إنشاء المزيد من المحتوى المجاني لثقافة البولار.",
+    donation_btn: "تبرع الآن",
+    close: "إغلاق"
   }
 };
 

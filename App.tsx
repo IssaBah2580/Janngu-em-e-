@@ -40,6 +40,7 @@ const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>(Screen.HOME);
   const [languagePair, setLanguagePair] = useState<LanguagePair>(() => detectInitialLanguage());
   const [theme, setTheme] = useState<'light' | 'dark'>(() => detectInitialTheme());
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
   const t = useMemo(() => getI18n(languagePair), [languagePair]);
 
@@ -57,6 +58,16 @@ const App: React.FC = () => {
       console.warn("Could not save language preference:", e);
     }
   }, [languagePair]);
+
+  // Global Timer for Donation Modal (Every 10 seconds)
+  useEffect(() => {
+    const DONATION_INTERVAL = 10 * 1000; 
+    const intervalId = setInterval(() => {
+      setIsDonationModalOpen(true);
+    }, DONATION_INTERVAL);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -106,6 +117,9 @@ const App: React.FC = () => {
     }
   };
 
+  const whatsappMessage = encodeURIComponent("Bonjour Janngu, je souhaite soutenir l'application Janngu Ɗemɗe.");
+  const whatsappUrl = `https://wa.me/22394650112?text=${whatsappMessage}`;
+
   return (
     <div className="min-h-screen max-w-md mx-auto bg-stone-50 dark:bg-slate-950 transition-colors duration-300 shadow-xl overflow-hidden flex flex-col relative">
       <main className="flex-1 pb-20 overflow-y-auto custom-scrollbar">
@@ -139,6 +153,40 @@ const App: React.FC = () => {
           label={t.quiz}
         />
       </nav>
+
+      {/* Donation Modal */}
+      {isDonationModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" onClick={() => setIsDonationModalOpen(false)}></div>
+          <div className="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-stone-100 dark:border-slate-800">
+            <div className="brand-gradient p-10 flex flex-col items-center text-center text-white">
+              <div className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center text-4xl mb-6 backdrop-blur-md shadow-inner">
+                🛠️
+              </div>
+              <h3 className="text-2xl font-black heading-brand mb-2">{t.donation_title}</h3>
+              <div className="w-12 h-1 bg-white/20 rounded-full mb-4"></div>
+              <p className="text-sm font-bold opacity-80 leading-relaxed italic">{t.donation_msg}</p>
+            </div>
+            <div className="p-8 flex flex-col gap-3">
+              <a 
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsDonationModalOpen(false)}
+                className="w-full brand-bg text-white py-4 rounded-2xl font-black text-center shadow-xl shadow-[#2d4156]/20 active:scale-95 transition-all heading-brand"
+              >
+                {t.donation_btn}
+              </a>
+              <button 
+                onClick={() => setIsDonationModalOpen(false)}
+                className="w-full text-stone-400 dark:text-stone-600 py-3 font-black text-xs uppercase tracking-[0.2em] hover:opacity-70 transition-opacity"
+              >
+                {t.close}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
