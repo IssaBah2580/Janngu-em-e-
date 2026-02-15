@@ -8,31 +8,32 @@ interface HomeScreenProps {
 }
 
 const Logo = () => (
-  <div className="relative w-28 h-28 mb-8">
-    <div className="absolute inset-0 bg-[#2d4156] dark:bg-slate-800 rounded-full shadow-[0_15px_30px_-10px_rgba(45,65,86,0.5)] flex items-center justify-center border-4 border-white/10 overflow-hidden transition-colors">
-      <span className="text-white font-black text-3xl tracking-tighter transform scale-y-110 heading-brand">Janngu</span>
-      <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent pointer-events-none"></div>
+  <div className="relative w-32 h-32 mb-10 group">
+    <div className="absolute inset-0 brand-gradient rounded-[2.5rem] shadow-2xl shadow-[#2d4156]/40 flex items-center justify-center border-4 border-white/20 dark:border-white/5 overflow-hidden transition-all duration-500 group-hover:rotate-6 group-hover:scale-110">
+      <span className="text-white font-black text-4xl tracking-tighter heading-brand drop-shadow-lg">J</span>
+      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_50%,transparent_75%)] bg-[length:250%_250%] animate-[shimmer_3s_infinite] pointer-events-none"></div>
     </div>
-    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-16 h-2.5 bg-black/10 blur-lg rounded-full"></div>
+    <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-20 h-4 bg-[#2d4156]/10 blur-xl rounded-full"></div>
   </div>
 );
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, t }) => {
   return (
-    <div className="p-6 pt-16 flex flex-col min-h-screen">
-      <header className="mb-12 flex flex-col items-center text-center">
+    <div className="p-8 pt-20 flex flex-col min-h-screen">
+      <header className="mb-14 flex flex-col items-center text-center animate-in fade-in slide-in-from-top-4 duration-700">
         <Logo />
-        <h1 className="text-4xl font-black text-[#2d4156] dark:text-stone-100 mb-3 tracking-tight heading-brand">{t.welcome}</h1>
-        <p className="text-stone-500 dark:text-stone-400 font-medium max-w-[280px] leading-relaxed">{t.subtitle}</p>
+        <h1 className="text-5xl font-black text-[#2d4156] dark:text-stone-100 mb-3 tracking-tight heading-brand leading-none">{t.welcome}</h1>
+        <p className="text-stone-500 dark:text-stone-400 font-semibold max-w-[300px] leading-relaxed opacity-80">{t.subtitle}</p>
       </header>
 
-      <div className="grid gap-6 flex-1">
+      <div className="grid gap-6 flex-1 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
         <ModuleCard 
           title={t.proverbs} 
           description={t.pulaar_wisdom}
           icon="📜"
           bg="bg-white dark:bg-slate-900"
           onClick={() => onNavigate(Screen.PROVERBS)}
+          delay="0"
         />
         <ModuleCard 
           title={t.lessons} 
@@ -40,6 +41,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, t }) => {
           icon="🎧"
           bg="bg-white dark:bg-slate-900"
           onClick={() => onNavigate(Screen.LESSONS)}
+          delay="100"
         />
         <ModuleCard 
           title={t.grammar} 
@@ -47,6 +49,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, t }) => {
           icon="📘"
           bg="bg-white dark:bg-slate-900"
           onClick={() => onNavigate(Screen.GRAMMAR)}
+          delay="200"
         />
         <ModuleCard 
           title={t.quiz} 
@@ -54,30 +57,37 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigate, t }) => {
           icon="🧠"
           bg="bg-white dark:bg-slate-900"
           onClick={() => onNavigate(Screen.QUIZ)}
+          delay="300"
         />
       </div>
 
-      <footer className="mt-16 text-center text-stone-300 dark:text-stone-700 text-[10px] font-black uppercase tracking-[0.2em] pb-12">
-        <div className="w-12 h-1 brand-bg mx-auto mb-4 opacity-20 dark:opacity-40 rounded-full"></div>
-        <p>© 2024 {t.welcome} • Sénégal</p>
+      <footer className="mt-20 text-center pb-12 animate-in fade-in duration-1000 delay-500">
+        <div className="w-16 h-1 bg-[#2d4156] mx-auto mb-6 opacity-10 rounded-full"></div>
+        <p className="text-stone-400 dark:text-stone-600 text-[10px] font-bold uppercase tracking-[0.3em] leading-relaxed">
+          © 2026 {t.welcome}<br/>
+          <span className="text-[#2d4156] dark:text-stone-500 opacity-60">Kayes Mali</span>
+        </p>
       </footer>
     </div>
   );
 };
 
-const ModuleCard: React.FC<{ title: string; description: string; icon: string; bg: string; onClick: () => void }> = ({ title, description, icon, bg, onClick }) => (
+const ModuleCard: React.FC<{ title: string; description: string; icon: string; bg: string; onClick: () => void; delay: string }> = ({ title, description, icon, bg, onClick, delay }) => (
   <button 
     onClick={onClick}
-    className={`${bg} w-full p-6 rounded-[2.5rem] text-left shadow-[0_10px_20px_-5px_rgba(0,0,0,0.03)] active:scale-[0.97] transition-all hover:shadow-[0_15px_30px_-10px_rgba(45,65,86,0.1)] border border-stone-100 dark:border-slate-800 flex items-center gap-5 group`}
+    style={{ animationDelay: `${delay}ms` }}
+    className={`${bg} w-full p-6 rounded-[2.5rem] text-left shadow-sm border border-stone-100 dark:border-slate-800 flex items-center gap-6 group active:scale-[0.96] transition-all hover:border-[#2d4156]/30 dark:hover:border-stone-600 hover:shadow-xl hover:shadow-black/5 animate-in slide-in-from-bottom-4 duration-500`}
   >
-    <div className="w-16 h-16 brand-bg rounded-3xl flex items-center justify-center text-3xl shadow-lg shadow-stone-200 dark:shadow-none transition-transform group-hover:scale-110">
+    <div className="w-16 h-16 brand-gradient rounded-3xl flex items-center justify-center text-3xl shadow-lg shadow-[#2d4156]/20 transition-transform group-hover:scale-110 group-hover:rotate-3 shrink-0">
       {icon}
     </div>
-    <div className="flex-1">
-      <h3 className="text-xl font-black text-[#2d4156] dark:text-stone-100 mb-1 heading-brand">{title}</h3>
-      <p className="text-xs text-stone-400 dark:text-stone-500 font-bold leading-tight uppercase tracking-widest">{description.length > 25 ? description.substring(0, 25) + '...' : description}</p>
+    <div className="flex-1 overflow-hidden">
+      <h3 className="text-2xl font-black text-[#2d4156] dark:text-stone-100 mb-1 heading-brand tracking-tight leading-none">{title}</h3>
+      <p className="text-[10px] text-stone-400 dark:text-stone-500 font-bold leading-tight uppercase tracking-widest truncate">
+        {description}
+      </p>
     </div>
-    <div className="brand-text dark:text-stone-600 opacity-20">
+    <div className="text-stone-200 dark:text-stone-800 transition-colors group-hover:text-[#2d4156]">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
     </div>
   </button>

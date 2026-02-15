@@ -251,7 +251,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, selected, onSel
 
       <footer className="mt-12 p-8 bg-stone-100/50 dark:bg-slate-900/50 rounded-[2.5rem] text-center border border-stone-100 dark:border-slate-800">
         <p className="text-sm font-black text-stone-800 dark:text-stone-200 tracking-tight heading-brand">{t.welcome}</p>
-        <p className="text-[10px] text-stone-400 dark:text-stone-600 mt-1 font-bold uppercase tracking-[0.2em]">Version 1.7.0 • Sénégal</p>
+        <p className="text-[10px] text-stone-400 dark:text-stone-600 mt-1 font-bold uppercase tracking-[0.2em]">Version 1.7.0 • Kayes Mali</p>
         <div className="mt-6 flex justify-center opacity-30">
            <div className="w-12 h-1.5 brand-bg rounded-full"></div>
         </div>
