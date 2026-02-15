@@ -16,9 +16,10 @@ async function decodeAudioData(
   sampleRate: number,
   numChannels: number,
 ): Promise<AudioBuffer> {
-  // Ensure the buffer is a multiple of 2 for Int16 conversion
   const byteLength = data.byteLength;
-  const dataInt16 = new Int16Array(data.buffer, 0, Math.floor(byteLength / 2));
+  // Use buffer.slice to ensure we have a clean ArrayBuffer that can be interpreted as Int16 without alignment issues
+  const bufferToDecode = data.buffer.slice(data.byteOffset, data.byteOffset + byteLength);
+  const dataInt16 = new Int16Array(bufferToDecode, 0, Math.floor(byteLength / 2));
   const frameCount = dataInt16.length / numChannels;
   const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
 
@@ -32,14 +33,20 @@ async function decodeAudioData(
 }
 
 /**
- * Generates speech for a given text.
+ * Generates speech for a given text using Gemini TTS.
  * @param text The text to speak.
  * @param lang Hint for the model to use the correct accent (e.g., 'French', 'English', 'Pulaar').
  * @param slow Whether to speak slowly.
  */
 export const speakText = async (text: string, lang: string = 'Pulaar', slow: boolean = false) => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    console.error("Gemini API Key is missing in process.env.API_KEY");
+    return null;
+  }
+
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey });
     const prompt = `Act as a native speaker of ${lang}. Say the following text ${slow ? 'slowly and clearly' : 'naturally'}: ${text}`;
     
     const response = await ai.models.generateContent({
@@ -58,7 +65,13 @@ export const speakText = async (text: string, lang: string = 'Pulaar', slow: boo
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (!base64Audio) return null;
 
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) {
+      console.error("Browser does not support AudioContext");
+      return null;
+    }
+
+    const audioContext = new AudioContextClass({ sampleRate: 24000 });
     const decodedBytes = decode(base64Audio);
     const audioBuffer = await decodeAudioData(decodedBytes, audioContext, 24000, 1);
     
@@ -69,7 +82,7 @@ export const speakText = async (text: string, lang: string = 'Pulaar', slow: boo
     
     return source;
   } catch (error) {
-    console.error("TTS Error:", error);
+    console.error("TTS Generation Failed:", error);
     return null;
   }
 };

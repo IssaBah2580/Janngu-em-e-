@@ -12,6 +12,14 @@
   <title>Janngu Ɗemɗe</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    // Robust polyfill for process.env
+    window.process = { 
+      env: { 
+        NODE_ENV: 'production'
+      } 
+    };
+  </script>
   <style>
     :root {
       --brand: #2d4156;
@@ -59,6 +67,12 @@
       100% { transform: translateY(0px); }
     }
     .animate-float { animation: float 4s ease-in-out infinite; }
+
+    /* Flashcard styles */
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
   </style>
 <script type="importmap">
 {
@@ -66,6 +80,7 @@
     "react": "https://esm.sh/react@19.0.0",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "react/jsx-runtime": "https://esm.sh/react@19.0.0/jsx-runtime",
     "@google/genai": "https://esm.sh/@google/genai@1.41.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "react/": "https://esm.sh/react@^19.2.4/"
