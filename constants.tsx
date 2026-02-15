@@ -39,15 +39,16 @@ export const GRAMMAR_COMPILATION: GrammarCategory[] = [
     title: { en: "Pronouns", fr: "Pronoms", pulaar: "Lomto" },
     sections: [
       {
-        title: { en: "Reflexive Pronouns", fr: "Pronoms Réflexifs" },
+        title: { en: "Reflexive Pronouns (Lomto innitto)", fr: "Pronoms Réflexifs (Lomto innitto)" },
         items: [
           { pulaar: "miin hoore am", en: "Myself", fr: "Moi-même" },
-          { pulaar: "aan hoore maa", en: "Yourself", fr: "Toi-même" },
+          { pulaar: "aan hoore maa", en: "Yourself", fr: "Toi-même / Vous-même" },
           { pulaar: "kanko hoore makko", en: "Himself / Herself", fr: "Lui-même / Elle-même" },
+          { pulaar: "kanngel hoore maggel", en: "Itself", fr: "Lui-même / Elle-même (objet)" },
           { pulaar: "kam hoore mum", en: "Oneself", fr: "Soi-même" },
           { pulaar: "enen e koye men", en: "Ourselves", fr: "Nous-mêmes" },
           { pulaar: "onon e koye mon", en: "Yourselves", fr: "Vous-mêmes" },
-          { pulaar: "kambe e koye mabbe", en: "Themselves", fr: "Eux-mêmes" },
+          { pulaar: "kambe e koye mabbe", en: "Themselves", fr: "Eux-mêmes / Elles-mêmes" },
         ]
       },
       {
@@ -56,6 +57,7 @@ export const GRAMMAR_COMPILATION: GrammarCategory[] = [
           { pulaar: "mi", en: "I", fr: "Je" },
           { pulaar: "am", en: "Me", fr: "Moi" },
           { pulaar: "en", en: "We", fr: "Nous" },
+          { pulaar: "men / enen", en: "Us", fr: "Nous (objet)" },
           { pulaar: "aan", en: "You (sing.)", fr: "Tu" },
           { pulaar: "onon", en: "You (plur.)", fr: "Vous" },
           { pulaar: "o", en: "He / She", fr: "Il / Elle" },
@@ -64,14 +66,28 @@ export const GRAMMAR_COMPILATION: GrammarCategory[] = [
         ]
       },
       {
-        title: { en: "Demonstrative Pronouns", fr: "Pronoms Démonstratifs" },
+        title: { en: "Demonstrative Pronouns (Jooporde)", fr: "Pronoms Démonstratifs (Jooporde)" },
         items: [
-          { pulaar: "oo / ndee / nduu", en: "This", fr: "Ceci / Ce" },
-          { pulaar: "ngela / oya / oon", en: "That", fr: "Cela / Ce" },
-          { pulaar: "dee / dii", en: "These", fr: "Ceux-ci" },
-          { pulaar: "diin / diya / ɓeya", en: "Those", fr: "Ceux-là" },
+          { pulaar: "oo / ndee / nduu / koo", en: "This", fr: "Ceci / Ce / Cette" },
+          { pulaar: "ngela / oya / oon", en: "That", fr: "Cela / Ce / Cette" },
+          { pulaar: "dee / dii", en: "These", fr: "Ceux-ci / Celles-ci" },
+          { pulaar: "diin / diya / ɓeya", en: "Those", fr: "Ceux-là / Celles-là" },
           { pulaar: "moni", en: "Who", fr: "Qui" },
+          { pulaar: "mo", en: "Whom", fr: "Qui (complément)" },
+          { pulaar: "ngel / ngal / kol", en: "Which", fr: "Lequel / Laquelle" },
           { pulaar: "holi / hol", en: "What", fr: "Quoi / Que" },
+        ]
+      },
+      {
+        title: { en: "Possessive Adjectives (Sifaa jeyirɗo)", fr: "Adjectifs Possessifs (Sifaa jeyirɗo)" },
+        items: [
+          { pulaar: "am", en: "My", fr: "Mon / Ma / Mes", example: "deftere am" },
+          { pulaar: "maa", en: "Your", fr: "Ton / Ta / Tes", example: "deftere maa" },
+          { pulaar: "makko", en: "His / Her", fr: "Son / Sa / Ses", example: "deftere makko" },
+          { pulaar: "maggel", en: "Its", fr: "Son / Sa / Ses", example: "laaci maggel" },
+          { pulaar: "men", en: "Our", fr: "Notre / Nos", example: "deftere men" },
+          { pulaar: "mon", en: "Your (plur.)", fr: "Votre / Vos", example: "deftere mon" },
+          { pulaar: "mabbe", en: "Their", fr: "Leur / Leurs", example: "deftere mabbe" },
         ]
       }
     ]
@@ -81,41 +97,43 @@ export const GRAMMAR_COMPILATION: GrammarCategory[] = [
     title: { en: "Essential Verbs", fr: "Verbes Essentiels", pulaar: "Gollal" },
     sections: [
       {
-        title: { en: "To Have (dañde)", fr: "Avoir (dañde)" },
+        title: { en: "To Have (Avoir / dañde)", fr: "Avoir (dañde)" },
         items: [
           { pulaar: "mi dañii", en: "I have", fr: "J'ai" },
           { pulaar: "a dañii", en: "You have", fr: "Tu as" },
-          { pulaar: "o dañii", en: "He/She has", fr: "Il/Elle a" },
+          { pulaar: "o dañii", en: "He has / She has", fr: "Il a / Elle a" },
           { pulaar: "en ndañii", en: "We have", fr: "Nous avons" },
-          { pulaar: "on ndañii", en: "You have (pl.)", fr: "Vous avez" },
+          { pulaar: "on ndañii", en: "You have (plur.)", fr: "Vous avez" },
           { pulaar: "ɓe ndañii", en: "They have", fr: "Ils/Elles ont" },
         ]
       },
       {
-        title: { en: "To Be (wonde)", fr: "Être (wonde)" },
-        items: [
-          { pulaar: "mi wonii", en: "I am", fr: "Je suis" },
-          { pulaar: "a wonii", en: "You are", fr: "Tu es" },
-          { pulaar: "o wonii", en: "He/She is", fr: "Il/Elle est" },
-          { pulaar: "en ngonii", en: "We are", fr: "Nous sommes" },
-          { pulaar: "on ngonii", en: "You are (pl.)", fr: "Vous êtes" },
-          { pulaar: "ɓe ngonii", en: "They are", fr: "Ils/Elles ont" },
-        ]
-      },
-      {
-        title: { en: "To Come (arde)", fr: "Venir (arde)" },
+        title: { en: "To Come (Venir / arde)", fr: "Venir (arde)" },
         items: [
           { pulaar: "mi arii", en: "I come", fr: "Je viens" },
           { pulaar: "a arii", en: "You come", fr: "Tu viens" },
-          { pulaar: "o arii", en: "He/She comes", fr: "Il/Elle vient" },
+          { pulaar: "o arii", en: "He comes / She comes", fr: "Il vient / Elle vient" },
+          { pulaar: "ngel arii", en: "It comes", fr: "Il/Elle vient" },
           { pulaar: "en ngarii", en: "We come", fr: "Nous venons" },
+        ]
+      },
+      {
+        title: { en: "To Be (Être / wonde / laataade)", fr: "Être (wonde / laataade)" },
+        items: [
+          { pulaar: "mi wonii / laatiima", en: "I am", fr: "Je suis" },
+          { pulaar: "a wonii / laatiima", en: "You are", fr: "Tu es" },
+          { pulaar: "o wonii / laatiima", en: "He is / She is", fr: "Il est / Elle est" },
+          { pulaar: "ngel wonii", en: "It is", fr: "C'est / Il est" },
+          { pulaar: "en ngonii", en: "We are", fr: "Nous sommes" },
+          { pulaar: "on ngonii", en: "You are (pl.)", fr: "Vous êtes" },
+          { pulaar: "ɓe ngonii", en: "They are", fr: "Ils/Elles sont" },
         ]
       }
     ]
   },
   {
     id: 'phrases',
-    title: { en: "Key Phrases", fr: "Phrases Clés", pulaar: "Konngudi" },
+    title: { en: "Key Phrases (Yeru)", fr: "Phrases Clés (Yeru)", pulaar: "Konngudi" },
     sections: [
       {
         title: { en: "Sentence Examples", fr: "Exemples de Phrases" },
