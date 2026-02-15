@@ -1,5 +1,4 @@
-
-import { Proverb, Lesson, QuizQuestion } from './types.ts';
+import { Proverb, Lesson, QuizQuestion, GrammarCategory } from './types.ts';
 
 export const PROVERBS: Proverb[] = [
   {
@@ -31,6 +30,101 @@ export const PROVERBS: Proverb[] = [
       es: "El anciano es el granero del conocimiento",
       ar: "الكبير هو مخزن المعرفة"
     }
+  }
+];
+
+export const GRAMMAR_COMPILATION: GrammarCategory[] = [
+  {
+    id: 'pronouns',
+    title: { en: "Pronouns", fr: "Pronoms", pulaar: "Lomto" },
+    sections: [
+      {
+        title: { en: "Reflexive Pronouns", fr: "Pronoms Réflexifs" },
+        items: [
+          { pulaar: "miin hoore am", en: "Myself", fr: "Moi-même" },
+          { pulaar: "aan hoore maa", en: "Yourself", fr: "Toi-même" },
+          { pulaar: "kanko hoore makko", en: "Himself / Herself", fr: "Lui-même / Elle-même" },
+          { pulaar: "kam hoore mum", en: "Oneself", fr: "Soi-même" },
+          { pulaar: "enen e koye men", en: "Ourselves", fr: "Nous-mêmes" },
+          { pulaar: "onon e koye mon", en: "Yourselves", fr: "Vous-mêmes" },
+          { pulaar: "kambe e koye mabbe", en: "Themselves", fr: "Eux-mêmes" },
+        ]
+      },
+      {
+        title: { en: "Personal Pronouns", fr: "Pronoms Personnels" },
+        items: [
+          { pulaar: "mi", en: "I", fr: "Je" },
+          { pulaar: "am", en: "Me", fr: "Moi" },
+          { pulaar: "en", en: "We", fr: "Nous" },
+          { pulaar: "aan", en: "You (sing.)", fr: "Tu" },
+          { pulaar: "onon", en: "You (plur.)", fr: "Vous" },
+          { pulaar: "o", en: "He / She", fr: "Il / Elle" },
+          { pulaar: "makko", en: "Him / Her", fr: "Lui / Elle" },
+          { pulaar: "dum / ngel", en: "It", fr: "Il / Elle (objet)" },
+        ]
+      },
+      {
+        title: { en: "Demonstrative Pronouns", fr: "Pronoms Démonstratifs" },
+        items: [
+          { pulaar: "oo / ndee / nduu", en: "This", fr: "Ceci / Ce" },
+          { pulaar: "ngela / oya / oon", en: "That", fr: "Cela / Ce" },
+          { pulaar: "dee / dii", en: "These", fr: "Ceux-ci" },
+          { pulaar: "diin / diya / ɓeya", en: "Those", fr: "Ceux-là" },
+          { pulaar: "moni", en: "Who", fr: "Qui" },
+          { pulaar: "holi / hol", en: "What", fr: "Quoi / Que" },
+        ]
+      }
+    ]
+  },
+  {
+    id: 'verbs',
+    title: { en: "Essential Verbs", fr: "Verbes Essentiels", pulaar: "Gollal" },
+    sections: [
+      {
+        title: { en: "To Have (dañde)", fr: "Avoir (dañde)" },
+        items: [
+          { pulaar: "mi dañii", en: "I have", fr: "J'ai" },
+          { pulaar: "a dañii", en: "You have", fr: "Tu as" },
+          { pulaar: "o dañii", en: "He/She has", fr: "Il/Elle a" },
+          { pulaar: "en ndañii", en: "We have", fr: "Nous avons" },
+          { pulaar: "on ndañii", en: "You have (pl.)", fr: "Vous avez" },
+          { pulaar: "ɓe ndañii", en: "They have", fr: "Ils/Elles ont" },
+        ]
+      },
+      {
+        title: { en: "To Be (wonde)", fr: "Être (wonde)" },
+        items: [
+          { pulaar: "mi wonii", en: "I am", fr: "Je suis" },
+          { pulaar: "a wonii", en: "You are", fr: "Tu es" },
+          { pulaar: "o wonii", en: "He/She is", fr: "Il/Elle est" },
+          { pulaar: "en ngonii", en: "We are", fr: "Nous sommes" },
+          { pulaar: "on ngonii", en: "You are (pl.)", fr: "Vous êtes" },
+          { pulaar: "ɓe ngonii", en: "They are", fr: "Ils/Elles ont" },
+        ]
+      },
+      {
+        title: { en: "To Come (arde)", fr: "Venir (arde)" },
+        items: [
+          { pulaar: "mi arii", en: "I come", fr: "Je viens" },
+          { pulaar: "a arii", en: "You come", fr: "Tu viens" },
+          { pulaar: "o arii", en: "He/She comes", fr: "Il/Elle vient" },
+          { pulaar: "en ngarii", en: "We come", fr: "Nous venons" },
+        ]
+      }
+    ]
+  },
+  {
+    id: 'phrases',
+    title: { en: "Key Phrases", fr: "Phrases Clés", pulaar: "Konngudi" },
+    sections: [
+      {
+        title: { en: "Sentence Examples", fr: "Exemples de Phrases" },
+        items: [
+          { pulaar: "neddo kala ena foti taweede", en: "Everybody should be there", fr: "Tout le monde devrait être là" },
+          { pulaar: "yoga e yimbe ina wonde laambe", en: "Some people want to be president", fr: "Certaines personnes veulent être président" },
+        ]
+      }
+    ]
   }
 ];
 
@@ -163,7 +257,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       es: {
         question: "¿Qué significa 'Cellal ko afo ngalu'?",
-        options: ["La disciplina es clave", "La salud precede a la riqueza", "El anciano es sabio", "El conocimiento es poder"],
+        options: ["La disciplina es clave", "La salud precede a la richesse", "El anciano es sabio", "El conocimiento es poder"],
         explanation: "Cellal significa salud, ngalu significa riqueza."
       },
       ar: {

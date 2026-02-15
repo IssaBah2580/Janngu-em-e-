@@ -1,4 +1,3 @@
-
 export enum Screen {
   HOME = 'HOME',
   PROVERBS = 'PROVERBS',
@@ -71,4 +70,20 @@ export interface QuizQuestion {
     ar: { question: string; options: string[]; explanation: string };
   };
   correctAnswerIndex: number;
+}
+
+export interface GrammarEntry {
+  pulaar: string;
+  en: string;
+  fr: string;
+  example?: string;
+}
+
+export interface GrammarCategory {
+  id: string;
+  title: { en: string; fr: string; pulaar: string };
+  sections: {
+    title: { en: string; fr: string };
+    items: GrammarEntry[];
+  }[];
 }
