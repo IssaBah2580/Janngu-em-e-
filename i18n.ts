@@ -47,6 +47,12 @@ export type UIStrings = {
   donation_msg: string;
   donation_btn: string;
   close: string;
+  about_app: string;
+  app_desc_full: string;
+  privacy_policy: string;
+  version: string;
+  teach_friend: string;
+  teach_friend_desc: string;
 };
 
 const translations: Record<string, UIStrings> = {
@@ -96,7 +102,13 @@ const translations: Record<string, UIStrings> = {
     donation_title: "Soutenez le Projet",
     donation_msg: "Janngu est en plein développement. Votre don, même modeste, nous aide à créer plus de contenu gratuit pour la culture Pulaar.",
     donation_btn: "Faire un don",
-    close: "Fermer"
+    close: "Fermer",
+    about_app: "À propos de Janngu Ɗemɗe",
+    app_desc_full: "Janngu Ɗemɗe est une plateforme moderne pour apprendre les langues africaines, commençant par le Pulaar, avec des leçons interactives, des proverbes et des quiz.",
+    privacy_policy: "Politique de confidentialité",
+    version: "Version",
+    teach_friend: "Enseigner à un ami",
+    teach_friend_desc: "Partagez la culture avec vos proches."
   },
   en: {
     home: "Home",
@@ -144,7 +156,13 @@ const translations: Record<string, UIStrings> = {
     donation_title: "Support the Project",
     donation_msg: "Janngu is under active development. Your contribution helps us create more free content for Pulaar culture.",
     donation_btn: "Make a Donation",
-    close: "Close"
+    close: "Close",
+    about_app: "About Janngu Ɗemɗe",
+    app_desc_full: "Janngu Ɗemɗe is a modern platform for learning African languages, starting with Pulaar, featuring interactive lessons, proverbs, and quizzes.",
+    privacy_policy: "Privacy Policy",
+    version: "Version",
+    teach_friend: "Teach a friend",
+    teach_friend_desc: "Share the culture with your loved ones."
   },
   es: {
     home: "Inicio",
@@ -192,7 +210,13 @@ const translations: Record<string, UIStrings> = {
     donation_title: "Apoya el Proyecto",
     donation_msg: "Janngu está en pleno desarrollo. Tu donación nos ayuda a crear más contenido gratuito para la cultura Pulaar.",
     donation_btn: "Hacer una donación",
-    close: "Cerrar"
+    close: "Cerrar",
+    about_app: "Acerca de Janngu Ɗemɗe",
+    app_desc_full: "Janngu Ɗemɗe es una plataforma moderna para aprender lenguas africanas, empezando por el Pulaar, con lecciones interactivas, proverbios y cuestionarios.",
+    privacy_policy: "Política de privacidad",
+    version: "Versión",
+    teach_friend: "Enseñar a un amigo",
+    teach_friend_desc: "Comparte la cultura con tus seres queridos."
   },
   ar: {
     home: "الرئيسية",
@@ -240,14 +264,25 @@ const translations: Record<string, UIStrings> = {
     donation_title: "ادعم المشروع",
     donation_msg: "جانغو قيد التطوير النشط. تساعدنا مساهمتك في إنشاء المزيد من المحتوى المجاني لثقافة البولار.",
     donation_btn: "تبرع الآن",
-    close: "إغلاق"
+    close: "إغلاق",
+    about_app: "حول جانغو ديمدي",
+    app_desc_full: "جانغو ديمدي هي منصة حديثة لتعلم اللغات الأفريقية، بدءاً من لغة البولار، وتتميز بدروس تفاعلية وأمثال واختبارات.",
+    privacy_policy: "سياسة الخصوصية",
+    version: "الإصدار",
+    teach_friend: "علم صديقاً",
+    teach_friend_desc: "شارك الثقافة مع أحبائك."
   }
 };
 
 export const getI18n = (pair: LanguagePair): UIStrings => {
-  if (pair.includes('FRENCH')) return translations.fr;
-  if (pair.includes('ENGLISH')) return translations.en;
-  if (pair.includes('SPANISH')) return translations.es;
-  if (pair.includes('ARABIC')) return translations.ar;
+  if (pair === LanguagePair.PULAAR_ENGLISH || pair === LanguagePair.ENGLISH_FRENCH) {
+     return translations.en;
+  }
+  if (pair === LanguagePair.PULAAR_SPANISH || pair === LanguagePair.FRENCH_SPANISH) {
+     return translations.es;
+  }
+  if (pair === LanguagePair.PULAAR_ARABIC) {
+     return translations.ar;
+  }
   return translations.fr;
 };

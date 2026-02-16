@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -11,37 +11,69 @@
   <link rel="manifest" href="manifest.json">
   <title>Janngu Ɗemɗe</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              DEFAULT: '#2d4156',
+              light: '#3d5875',
+              dark: '#1a2633',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
-    // Robust polyfill for process.env
     window.process = { 
       env: { 
-        NODE_ENV: 'production'
+        NODE_ENV: 'production',
+        API_KEY: '' 
       } 
     };
+    var process = window.process;
   </script>
   <style>
     :root {
       --brand: #2d4156;
       --brand-dark: #1a2633;
     }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: contain;
-      background-color: #fbfbf9;
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+    #root {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
     
     .glass {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
     .dark .glass {
-      background: rgba(15, 23, 42, 0.7);
+      background: rgba(15, 23, 42, 0.95);
     }
 
     .brand-gradient {
@@ -50,45 +82,46 @@
 
     .heading-brand {
       font-weight: 800;
-      letter-spacing: -0.03em;
-    }
-
-    .card-shadow {
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
-    }
-    
-    .active-nav-glow {
-      box-shadow: 0 0 15px rgba(45, 65, 86, 0.2);
+      letter-spacing: -0.025em;
     }
 
     @keyframes float {
       0% { transform: translateY(0px); }
-      50% { transform: translateY(-5px); }
+      50% { transform: translateY(-8px); }
       100% { transform: translateY(0px); }
     }
     .animate-float { animation: float 4s ease-in-out infinite; }
 
-    /* Flashcard styles */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+      20%, 40%, 60%, 80% { transform: translateX(4px); }
+    }
+    .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+
     .perspective-1000 { perspective: 1000px; }
     .transform-style-3d { transform-style: preserve-3d; }
     .backface-hidden { backface-visibility: hidden; }
     .rotate-y-180 { transform: rotateY(180deg); }
+
+    /* Fix transitions for color accessibility */
+    * { transition: border-color 0.2s ease, background-color 0.4s ease-in-out, color 0.2s ease; }
   </style>
 <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@19.0.0",
+    "react/": "https://esm.sh/react@19.0.0/",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/": "https://esm.sh/react-dom@19.0.0/",
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
     "react/jsx-runtime": "https://esm.sh/react@19.0.0/jsx-runtime",
-    "@google/genai": "https://esm.sh/@google/genai@1.41.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/"
+    "@google/genai": "https://esm.sh/@google/genai@1.41.0"
   }
 }
 </script>
 </head>
-<body class="bg-stone-50 dark:bg-slate-950 text-stone-900 dark:text-stone-100 select-none">
+<body class="bg-white dark:bg-slate-950 text-stone-900 dark:text-stone-100 select-none antialiased overflow-hidden">
   <div id="root"></div>
   <script type="module" src="index.tsx"></script>
 </body>

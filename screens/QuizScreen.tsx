@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { QUIZ_QUESTIONS } from '../constants.tsx';
 import { UIStrings } from '../i18n.ts';
 import { LanguagePair } from '../types.ts';
-import { speakText } from '../services/geminiService.ts';
+import { GoogleGenAI } from "@google/genai";
 
 interface QuizScreenProps {
   onBack: () => void;
@@ -16,29 +16,11 @@ const QuizScreen: React.FC<QuizScreenProps> = ({ onBack, t, languagePair }) => {
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(null);
   const [isFinished, setIsFinished] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [isPlaying, setIsPlaying] = useState<string | null>(null);
+  const [aiFeedback, setAiFeedback] = useState<string | null>(null);
+  const [isLoadingAi, setIsLoadingAi] = useState(false);
 
   const rawQuestion = QUIZ_QUESTIONS[currentIndex];
   
-  const getLanguageName = () => {
-    if (languagePair.includes('FRENCH')) return 'French';
-    if (languagePair.includes('ENGLISH')) return 'English';
-    if (languagePair.includes('SPANISH')) return 'Spanish';
-    if (languagePair.includes('ARABIC')) return 'Arabic';
-    return 'French';
-  };
-
-  const handleSpeak = async (text: string, lang: string = 'Pulaar') => {
-    if (!navigator.onLine) {
-      alert(t.internet_required);
-      return;
-    }
-    setIsPlaying(text);
-    await speakText(text, lang);
-    setIsPlaying(null);
-  };
-
-  // Extract correct translation based on language pair
   const currentContent = useMemo(() => {
     const lang = languagePair.includes('FRENCH') ? 'fr' : 
                  languagePair.includes('ENGLISH') ? 'en' :
@@ -48,12 +30,44 @@ const QuizScreen: React.FC<QuizScreenProps> = ({ onBack, t, languagePair }) => {
 
   const progress = ((currentIndex + 1) / QUIZ_QUESTIONS.length) * 100;
 
-  const handleOptionSelect = (index: number) => {
+  const fetchSmartFeedback = async (userChoice: string, correctChoice: string) => {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) return;
+
+    setIsLoadingAi(true);
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      const prompt = `You are a Pulaar language tutor. 
+      Question: "${currentContent.question}"
+      Correct Answer: "${correctChoice}"
+      User's Wrong Choice: "${userChoice}"
+      
+      Task: Briefly explain why "${userChoice}" is incorrect in this context and provide a subtle linguistic hint to help them find the correct answer next time. Do not just repeat the correct answer. Keep it under 60 words. Speak in ${languagePair.includes('ENGLISH') ? 'English' : 'French'}.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+      });
+
+      setAiFeedback(response.text || null);
+    } catch (error) {
+      console.error("AI Feedback failed:", error);
+    } finally {
+      setIsLoadingAi(false);
+    }
+  };
+
+  const handleOptionSelect = async (index: number) => {
     if (selectedOptionIndex !== null) return;
     setSelectedOptionIndex(index);
     setShowFeedback(true);
-    if (index === rawQuestion.correctAnswerIndex) {
+    
+    const isCorrect = index === rawQuestion.correctAnswerIndex;
+    if (isCorrect) {
       setScore(prev => prev + 1);
+    } else {
+      // Fetch AI feedback for incorrect answers
+      fetchSmartFeedback(currentContent.options[index], currentContent.options[rawQuestion.correctAnswerIndex]);
     }
   };
 
@@ -62,6 +76,8 @@ const QuizScreen: React.FC<QuizScreenProps> = ({ onBack, t, languagePair }) => {
       setCurrentIndex(prev => prev + 1);
       setSelectedOptionIndex(null);
       setShowFeedback(false);
+      setAiFeedback(null);
+      setIsLoadingAi(false);
     } else {
       setIsFinished(true);
     }
@@ -72,85 +88,55 @@ const QuizScreen: React.FC<QuizScreenProps> = ({ onBack, t, languagePair }) => {
     setScore(0);
     setSelectedOptionIndex(null);
     setShowFeedback(false);
+    setAiFeedback(null);
     setIsFinished(false);
   };
-
-  const currentLang = getLanguageName();
 
   if (isFinished) {
     return (
       <div className="p-8 h-full flex flex-col items-center justify-center animate-in zoom-in duration-700">
-        <div className="w-36 h-36 brand-bg rounded-full flex items-center justify-center text-white mb-10 shadow-2xl shadow-[#2d4156]/40 relative overflow-hidden">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-          <div className="absolute inset-0 bg-white/5 pointer-events-none"></div>
+        <div className="w-32 h-32 brand-gradient rounded-full flex items-center justify-center text-white mb-8 shadow-2xl">
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
         </div>
-        <h2 className="text-4xl font-black mb-2 brand-text heading-brand text-center">{t.congrats}</h2>
-        <p className="text-stone-400 mb-12 font-bold uppercase tracking-widest text-[10px] text-center">Challenge Complete</p>
-        
-        <div className="bg-white p-10 rounded-[3rem] w-full text-center border border-stone-100 shadow-sm mb-10">
-          <p className="text-stone-300 font-black uppercase tracking-[0.3em] text-[10px] mb-4">{t.score}</p>
-          <div className="text-6xl font-black brand-text heading-brand">
-            {score} <span className="text-2xl text-stone-200">/ {QUIZ_QUESTIONS.length}</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4 w-full">
-          <button 
-            onClick={restartQuiz}
-            className="w-full brand-bg text-white p-5 rounded-2xl font-black shadow-xl shadow-[#2d4156]/20 active:scale-95 transition-all heading-brand"
-          >
-            {t.try_again}
-          </button>
-          <button 
-            onClick={onBack}
-            className="w-full bg-stone-100 text-stone-400 p-5 rounded-2xl font-black active:scale-95 transition-all uppercase tracking-[0.2em] text-xs"
-          >
-            {t.back}
-          </button>
-        </div>
+        <h2 className="text-3xl font-black mb-2 text-stone-900 dark:text-white heading-brand">{t.congrats}</h2>
+        <p className="text-stone-500 dark:text-stone-400 font-bold text-center mb-8 uppercase tracking-widest text-xs">Score: {score} / {QUIZ_QUESTIONS.length}</p>
+        <button onClick={restartQuiz} className="w-full bg-brand text-white py-5 rounded-2xl font-black shadow-lg mb-3 heading-brand uppercase tracking-widest text-xs">Recommencer</button>
+        <button onClick={onBack} className="w-full bg-stone-100 dark:bg-slate-800 text-stone-500 dark:text-stone-400 py-5 rounded-2xl font-black text-xs uppercase tracking-widest">Retour</button>
       </div>
     );
   }
 
   return (
-    <div className="p-6 min-h-full flex flex-col">
+    <div className="p-6 min-h-full flex flex-col bg-stone-50 dark:bg-slate-950">
       <header className="flex items-center justify-between gap-6 mb-10 pt-4">
-        <button onClick={onBack} className="p-2.5 rounded-2xl brand-bg text-white shadow-lg active:scale-90 transition-all">
-           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        <button onClick={onBack} className="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-stone-100 dark:border-slate-800 text-brand dark:text-stone-300">
+           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
-        <div className="flex-1 px-4">
-          <div className="h-3 w-full bg-stone-100 rounded-full overflow-hidden shadow-inner">
-            <div 
-              className="h-full brand-bg transition-all duration-700 ease-out" 
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+        <div className="flex-1 h-2.5 bg-stone-100 dark:bg-slate-900 rounded-full overflow-hidden border border-stone-200/50 dark:border-slate-800">
+          <div className="h-full bg-brand transition-all duration-700" style={{ width: `${progress}%` }} />
         </div>
-        <span className="text-xs font-black brand-text opacity-40 uppercase tracking-widest">{currentIndex + 1}/{QUIZ_QUESTIONS.length}</span>
+        <span className="text-[10px] font-black text-stone-500 dark:text-stone-500 uppercase tracking-widest">{currentIndex + 1}/{QUIZ_QUESTIONS.length}</span>
       </header>
 
-      <div className="flex-1 flex flex-col animate-in fade-in slide-in-from-right-8 duration-500">
-        <div className="flex items-start justify-between gap-6 mb-10">
-          <h3 className="text-3xl font-black text-[#2d4156] leading-tight heading-brand">
-            {currentContent.question}
-          </h3>
-          <button 
-            onClick={() => handleSpeak(currentContent.question, currentLang)}
-            className="w-14 h-14 rounded-2xl bg-white brand-text shadow-sm hover:shadow-md transition-all shrink-0 flex items-center justify-center active:scale-90"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          </button>
-        </div>
+      <div className="flex-1 pb-24">
+        <h3 className="text-3xl font-black text-stone-900 dark:text-white leading-tight heading-brand mb-10 animate-in slide-in-from-left-4">
+          {currentContent.question}
+        </h3>
 
         <div className="space-y-4">
           {currentContent.options.map((option, i) => {
             const isCorrect = i === rawQuestion.correctAnswerIndex;
             const isSelected = selectedOptionIndex === i;
+            let btnClass = "bg-white dark:bg-slate-900 border-stone-100 dark:border-slate-800 text-stone-900 dark:text-stone-100 shadow-sm";
             
-            let btnClass = "bg-white border-stone-100 text-[#2d4156] hover:border-[#2d4156]/30";
             if (showFeedback) {
-              if (isCorrect) btnClass = "brand-bg border-[#2d4156] text-white shadow-xl shadow-[#2d4156]/20";
-              else if (isSelected) btnClass = "bg-rose-500 border-rose-500 text-white shadow-xl shadow-rose-200";
+              if (isCorrect) {
+                btnClass = "bg-emerald-500 border-emerald-600 text-white shadow-lg shadow-emerald-500/20 scale-[1.02]";
+              } else if (isSelected) {
+                btnClass = "bg-rose-500 border-rose-600 text-white shadow-lg shadow-rose-500/20";
+              } else {
+                btnClass = "bg-white dark:bg-slate-900 border-stone-100 dark:border-slate-800 text-stone-300 dark:text-stone-700 opacity-50";
+              }
             }
 
             return (
@@ -158,47 +144,60 @@ const QuizScreen: React.FC<QuizScreenProps> = ({ onBack, t, languagePair }) => {
                 key={i}
                 disabled={selectedOptionIndex !== null}
                 onClick={() => handleOptionSelect(i)}
-                className={`w-full p-6 rounded-[2rem] border-2 text-left font-black text-xl transition-all active:scale-[0.98] heading-brand shadow-sm flex items-center justify-between gap-4 ${btnClass}`}
+                className={`w-full p-6 rounded-[2.5rem] border-2 text-left font-black text-lg transition-all active:scale-[0.98] ${btnClass}`}
               >
-                <div className="flex items-center gap-5">
-                  <span className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center text-xs transition-colors ${showFeedback ? 'border-white/20' : 'border-stone-100 text-stone-300'}`}>
-                    {String.fromCharCode(65 + i)}
-                  </span>
-                  {option}
+                <div className="flex items-center justify-between">
+                  <span>{option}</span>
+                  {showFeedback && isCorrect && (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="animate-in zoom-in"><polyline points="20 6 9 17 4 12"/></svg>
+                  )}
                 </div>
-                {showFeedback && (
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); handleSpeak(option, 'Pulaar'); }}
-                    className={`p-2 rounded-xl transition-all ${isCorrect ? 'bg-white/10 text-white' : 'bg-black/10 text-white'}`}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg>
-                  </button>
-                )}
               </button>
             );
           })}
         </div>
 
         {showFeedback && (
-          <div className={`mt-10 p-8 rounded-[2.5rem] border-2 animate-in slide-in-from-bottom-8 duration-500 ${
-            selectedOptionIndex === rawQuestion.correctAnswerIndex ? 'bg-emerald-50 border-emerald-100/50' : 'bg-rose-50 border-rose-100/50'
-          }`}>
-            <div className="flex items-start justify-between gap-4">
-              <p className="text-stone-600 font-bold text-sm leading-relaxed italic">{currentContent.explanation}</p>
-              <button 
-                onClick={() => handleSpeak(currentContent.explanation, currentLang)}
-                className="p-2.5 rounded-xl bg-white brand-text shadow-sm hover:opacity-70 shrink-0"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-              </button>
+          <div className="mt-8 space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-500">
+            {/* Standard Feedback */}
+            <div className={`p-8 rounded-[3rem] border-2 ${selectedOptionIndex === rawQuestion.correctAnswerIndex ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/20 text-emerald-800 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-900/10 border-rose-100 dark:border-rose-900/20 text-rose-800 dark:text-rose-400'}`}>
+              <div className="flex items-start gap-4">
+                <div className="text-2xl mt-1">{selectedOptionIndex === rawQuestion.correctAnswerIndex ? '✨' : '⚠️'}</div>
+                <p className="text-sm font-bold leading-relaxed italic">“{currentContent.explanation}”</p>
+              </div>
             </div>
+
+            {/* Smart AI Tutor Insights */}
+            {(isLoadingAi || aiFeedback) && selectedOptionIndex !== rawQuestion.correctAnswerIndex && (
+              <div className="p-8 rounded-[3rem] bg-white dark:bg-slate-900 border border-brand/20 dark:border-slate-800 shadow-xl shadow-brand/5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                </div>
+                
+                <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-brand dark:text-stone-500 mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse"></span>
+                  Conseil du Tuteur AI
+                </h4>
+
+                {isLoadingAi ? (
+                  <div className="space-y-3 animate-pulse">
+                    <div className="h-4 bg-stone-100 dark:bg-slate-800 rounded-full w-full"></div>
+                    <div className="h-4 bg-stone-100 dark:bg-slate-800 rounded-full w-[90%]"></div>
+                    <div className="h-4 bg-stone-100 dark:bg-slate-800 rounded-full w-[40%]"></div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-stone-600 dark:text-stone-300 font-medium leading-relaxed animate-in fade-in duration-1000">
+                    {aiFeedback}
+                  </p>
+                )}
+              </div>
+            )}
+
             <button 
-              onClick={handleNext}
-              className={`mt-8 w-full p-5 rounded-2xl font-black text-white shadow-xl active:scale-95 transition-all heading-brand ${
-                 selectedOptionIndex === rawQuestion.correctAnswerIndex ? 'brand-bg' : 'bg-rose-500'
-              }`}
+              onClick={handleNext} 
+              className="w-full p-6 rounded-[2rem] font-black bg-brand text-white shadow-xl shadow-brand/20 heading-brand uppercase tracking-widest text-xs active:scale-95 transition-all"
             >
-              {t.continue}
+              {currentIndex < QUIZ_QUESTIONS.length - 1 ? 'Question Suivante' : 'Voir le Résultat'}
             </button>
           </div>
         )}
