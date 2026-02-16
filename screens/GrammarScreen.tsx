@@ -9,38 +9,51 @@ const GrammarScreen: React.FC<{ onBack: () => void; t: UIStrings; languagePair: 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
 
-  // Global Challenge states
+  // Challenge states (Global Tab)
   const [challengeIdx, setChallengeIdx] = useState(0);
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
   const [availableWords, setAvailableWords] = useState<string[]>([]);
   const [challengeFeedback, setChallengeFeedback] = useState<{ message: string; type: 'success' | 'error' | 'hint' | null; errorIdx?: number }>({ message: '', type: null });
 
-  // Possessive Challenge states
-  const [isPossessivePractice, setIsPossessivePractice] = useState(false);
-  const [possessiveIdx, setPossessiveIdx] = useState(0);
-  const [pSelected, setPSelected] = useState<string[]>([]);
-  const [pAvailable, setPAvailable] = useState<string[]>([]);
-  const [pFeedback, setPFeedback] = useState<'success' | 'error' | null>(null);
+  // Sub-tab state for possessives
+  const [possessiveSubTab, setPossessiveSubTab] = useState<'list' | 'practice' | 'order'>('list');
+
+  // Flashcard states
+  const [currentFlashcardIdx, setCurrentFlashcardIdx] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  // Order Challenge states (Specific for possessives)
+  const [orderChallengeIdx, setOrderChallengeIdx] = useState(0);
+  const [selectedOrderWords, setSelectedOrderWords] = useState<string[]>([]);
+  const [availableOrderWords, setAvailableOrderWords] = useState<string[]>([]);
+  const [orderFeedback, setOrderFeedback] = useState<{ type: 'success' | 'error' | null }>({ type: null });
 
   const currentChallenge = WORD_ORDER_CHALLENGES[challengeIdx];
-  const correctWords = useMemo(() => currentChallenge.pulaar.split(' '), [currentChallenge]);
 
-  // Extract possessive examples for the mini-game
-  const possessiveExamples = useMemo(() => {
-    const cat = GRAMMAR_COMPILATION.find(c => c.id === 'possessives');
-    if (!cat) return [];
-    const items = cat.sections.flatMap(s => s.items);
-    return items.filter(item => item.example).map(item => {
-      // Example format: "Deftere am (Mon livre)"
-      const pulaarPart = item.example!.split('(')[0].trim();
-      const words = pulaarPart.split(' ');
-      return {
-        full: pulaarPart,
-        words: words,
-        translation: item.example!.split('(')[1]?.replace(')', '').trim() || ""
-      };
+  // Flashcard and Order Challenge items derived from possessives
+  const derivedItems = useMemo(() => {
+    const possessiveCat = GRAMMAR_COMPILATION.find(c => c.id === 'possessives');
+    if (!possessiveCat) return [];
+    
+    const items: { front: string, back: string, pulaarParts: string[] }[] = [];
+    possessiveCat.sections.forEach(sec => {
+      sec.items.forEach(item => {
+        if (item.example) {
+          const match = item.example.match(/(.*)\s\((.*)\)/);
+          if (match) {
+            items.push({ 
+              front: match[1], 
+              back: match[2],
+              pulaarParts: match[1].split(' ') 
+            });
+          }
+        }
+      });
     });
+    return items;
   }, []);
+
+  const currentOrderChallenge = derivedItems[orderChallengeIdx];
 
   useEffect(() => {
     if (activeTab === 'challenge') {
@@ -51,18 +64,16 @@ const GrammarScreen: React.FC<{ onBack: () => void; t: UIStrings; languagePair: 
   }, [challengeIdx, activeTab, currentChallenge.words]);
 
   useEffect(() => {
-    if (isPossessivePractice && possessiveExamples.length > 0) {
-      const current = possessiveExamples[possessiveIdx];
-      setPAvailable([...current.words].sort(() => Math.random() - 0.5));
-      setPSelected([]);
-      setPFeedback(null);
+    if (activeTab === 'possessives' && possessiveSubTab === 'order' && currentOrderChallenge) {
+      setAvailableOrderWords([...currentOrderChallenge.pulaarParts].sort(() => Math.random() - 0.5));
+      setSelectedOrderWords([]);
+      setOrderFeedback({ type: null });
     }
-  }, [isPossessivePractice, possessiveIdx, possessiveExamples]);
+  }, [orderChallengeIdx, activeTab, possessiveSubTab, currentOrderChallenge]);
 
-  const getLanguageKey = () => {
-    if (languagePair.includes('ENGLISH')) return 'en';
-    return 'fr'; 
-  };
+  const getLanguageKey = () => (languagePair.includes('ENGLISH') ? 'en' : 'fr');
+  const langKey = getLanguageKey();
+  const activeCategory = GRAMMAR_COMPILATION.find(c => c.id === activeTab) || GRAMMAR_COMPILATION[0];
 
   const handleSpeak = async (text: string, lang: string = 'Pulaar', id: string = "", slow: boolean = false) => {
     if (!navigator.onLine) {
@@ -79,7 +90,6 @@ const GrammarScreen: React.FC<{ onBack: () => void; t: UIStrings; languagePair: 
     setExpandedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
   };
 
-  // Main Challenge Logic
   const handleWordClick = (word: string, fromAvailable: boolean) => {
     if (fromAvailable) {
       setSelectedWords([...selectedWords, word]);
@@ -92,125 +102,127 @@ const GrammarScreen: React.FC<{ onBack: () => void; t: UIStrings; languagePair: 
     setChallengeFeedback({ message: '', type: null });
   };
 
+  const handleOrderWordClick = (word: string, fromAvailable: boolean) => {
+    if (orderFeedback.type === 'success') return;
+    
+    if (fromAvailable) {
+      const newSelected = [...selectedOrderWords, word];
+      setSelectedOrderWords(newSelected);
+      setAvailableOrderWords(availableOrderWords.filter((w, i) => i !== availableOrderWords.indexOf(word)));
+      
+      // Auto-check if all words are picked
+      if (newSelected.length === currentOrderChallenge.pulaarParts.length) {
+        checkOrder(newSelected);
+      }
+    } else {
+      setAvailableOrderWords([...availableOrderWords, word]);
+      const lastIdx = selectedOrderWords.lastIndexOf(word);
+      setSelectedOrderWords(selectedOrderWords.filter((_, i) => i !== lastIdx));
+      setOrderFeedback({ type: null });
+    }
+  };
+
+  const checkOrder = (currentSelection: string[]) => {
+    const isCorrect = currentSelection.join(' ') === currentOrderChallenge.front;
+    if (isCorrect) {
+      setOrderFeedback({ type: 'success' });
+      handleSpeak(currentOrderChallenge.front);
+    } else {
+      setOrderFeedback({ type: 'error' });
+    }
+  };
+
   const checkSentence = () => {
     const isCorrect = selectedWords.join(' ') === currentChallenge.pulaar;
     if (isCorrect) {
-      setChallengeFeedback({ message: "Excellent ! C'est la structure correcte.", type: 'success' });
+      setChallengeFeedback({ message: t.correct, type: 'success' });
       handleSpeak(currentChallenge.pulaar);
     } else {
-      let mismatchIdx = -1;
-      for (let i = 0; i < selectedWords.length; i++) {
-        if (selectedWords[i] !== correctWords[i]) {
-          mismatchIdx = i;
-          break;
-        }
-      }
-      if (mismatchIdx === 0) {
-        setChallengeFeedback({ message: `Indice : La phrase commence souvent par "${correctWords[0]}".`, type: 'error', errorIdx: 0 });
-      } else if (mismatchIdx !== -1) {
-        setChallengeFeedback({ message: `Le mot "${selectedWords[mismatchIdx]}" est mal placé.`, type: 'error', errorIdx: mismatchIdx });
-      } else if (selectedWords.length < correctWords.length) {
-        setChallengeFeedback({ message: "La phrase est incomplète.", type: 'hint' });
-      } else {
-        setChallengeFeedback({ message: "L'ordre des mots est incorrect.", type: 'error' });
-      }
+      setChallengeFeedback({ message: t.wrong_order, type: 'error' });
     }
   };
 
-  // Possessive Practice Logic
-  const handlePossessiveWordClick = (word: string) => {
-    if (pFeedback === 'success') return;
-    
-    const newSelected = [...pSelected, word];
-    const newAvailable = pAvailable.filter((w, i) => i !== pAvailable.indexOf(word));
-    
-    setPSelected(newSelected);
-    setPAvailable(newAvailable);
-    setPFeedback(null);
-
-    // Auto-check when all words are placed
-    if (newAvailable.length === 0) {
-      const current = possessiveExamples[possessiveIdx];
-      if (newSelected.join(' ') === current.full) {
-        setPFeedback('success');
-        handleSpeak(current.full);
-        setTimeout(() => {
-          if (possessiveIdx < possessiveExamples.length - 1) {
-            setPossessiveIdx(prev => prev + 1);
-          } else {
-            setIsPossessivePractice(false);
-          }
-        }, 1500);
-      } else {
-        setPFeedback('error');
-        // Reset after a short delay for user to see the error
-        setTimeout(() => {
-          setPAvailable([...current.words].sort(() => Math.random() - 0.5));
-          setPSelected([]);
-          setPFeedback(null);
-        }, 800);
-      }
-    }
+  const nextOrderChallenge = () => {
+    setOrderChallengeIdx(prev => (prev + 1) % derivedItems.length);
   };
-
-  const langKey = getLanguageKey();
-  const activeCategory = GRAMMAR_COMPILATION.find(c => c.id === activeTab) || GRAMMAR_COMPILATION[0];
 
   return (
-    <div className="flex flex-col min-h-full bg-stone-50 dark:bg-slate-950 transition-colors">
-      <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl sticky top-0 z-30 border-b border-stone-100 dark:border-slate-800 transition-colors">
-        <div className="p-5 flex items-center gap-4">
-          <button onClick={onBack} className="p-2.5 rounded-2xl bg-brand text-white shadow-lg active:scale-90 transition-all">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    <div className="flex flex-col min-h-screen bg-[#f8f9fa] dark:bg-slate-950 transition-colors">
+      <header className="bg-white dark:bg-slate-900 px-6 pt-10 pb-4 flex flex-col gap-6 sticky top-0 z-40 border-b border-stone-100 dark:border-slate-800">
+        <div className="flex items-center gap-6">
+          <button onClick={onBack} className="text-stone-900 dark:text-white hover:opacity-70 transition-opacity">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </button>
           <div>
             <h2 className="text-xl font-black text-stone-900 dark:text-stone-100 heading-brand leading-none">{t.grammar}</h2>
-            <p className="text-[10px] font-black text-brand dark:text-stone-500 uppercase tracking-widest mt-1">Guide Pulaar</p>
+            <p className="text-[10px] font-black text-[#00a884] dark:text-emerald-500 uppercase tracking-widest mt-1">LOGIQUE & STRUCTURE</p>
           </div>
         </div>
         
-        <div className="px-5 pb-4 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar py-2">
           {GRAMMAR_COMPILATION.map((cat) => (
             <button 
               key={cat.id} 
-              onClick={() => { setActiveTab(cat.id); setIsPossessivePractice(false); }}
-              className={`px-5 py-2.5 rounded-2xl font-black text-xs whitespace-nowrap transition-all border-2 ${
+              onClick={() => setActiveTab(cat.id)}
+              className={`px-6 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-all ${
                 activeTab === cat.id 
-                ? 'bg-brand border-brand text-white' 
-                : 'bg-stone-50 dark:bg-slate-800 border-stone-100 dark:border-slate-700 text-stone-500 dark:text-stone-400'
+                ? 'bg-[#00a884] text-white shadow-md' 
+                : 'bg-stone-100 dark:bg-slate-800 text-stone-500'
               }`}
             >
               {cat.title[langKey]}
             </button>
           ))}
           <button 
-            onClick={() => { setActiveTab('challenge'); setIsPossessivePractice(false); }}
-            className={`px-5 py-2.5 rounded-2xl font-black text-xs whitespace-nowrap transition-all border-2 ${
+            onClick={() => setActiveTab('challenge')}
+            className={`px-6 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-all ${
               activeTab === 'challenge' 
-              ? 'bg-amber-500 border-amber-600 text-white' 
-              : 'bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-900/30 text-amber-600 dark:text-amber-400'
+              ? 'bg-amber-500 text-white shadow-md' 
+              : 'bg-amber-50 dark:bg-amber-900/10 text-amber-600'
             }`}
           >
-            🧩 Challenge
+            🧩 Défi
           </button>
         </div>
+
+        {activeTab === 'possessives' && (
+          <div className="flex bg-stone-100 dark:bg-slate-800 p-1 rounded-2xl">
+             <button 
+              onClick={() => setPossessiveSubTab('list')}
+              className={`flex-1 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${possessiveSubTab === 'list' ? 'bg-white dark:bg-slate-700 text-[#00a884] shadow-sm' : 'text-stone-400'}`}
+             >
+               {t.list_mode}
+             </button>
+             <button 
+              onClick={() => setPossessiveSubTab('practice')}
+              className={`flex-1 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${possessiveSubTab === 'practice' ? 'bg-white dark:bg-slate-700 text-[#00a884] shadow-sm' : 'text-stone-400'}`}
+             >
+               {t.practice_mode}
+             </button>
+             <button 
+              onClick={() => setPossessiveSubTab('order')}
+              className={`flex-1 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${possessiveSubTab === 'order' ? 'bg-white dark:bg-slate-700 text-[#00a884] shadow-sm' : 'text-stone-400'}`}
+             >
+               {t.order_challenge}
+             </button>
+          </div>
+        )}
       </header>
 
-      <div className="p-6 space-y-8 animate-in fade-in duration-700 pb-32">
+      <div className="p-6 space-y-8 pb-32">
         {activeTab === 'challenge' ? (
-          <div className="space-y-8">
-            <div className="bg-amber-50 dark:bg-amber-900/10 p-10 rounded-[3rem] border-2 border-amber-100 dark:border-amber-900/20 text-center">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-600 dark:text-amber-400 mb-4 block">Défi Structure</span>
-              <h3 className="text-2xl font-black heading-brand text-stone-900 dark:text-stone-50 mb-3">"{currentChallenge.translation[langKey]}"</h3>
+          <div className="space-y-8 animate-in zoom-in-95 duration-500">
+            <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-stone-100 dark:border-slate-800 shadow-sm text-center">
+               <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-2">Traduisez :</p>
+               <h3 className="text-2xl font-black heading-brand text-stone-900 dark:text-white">"{currentChallenge.translation[langKey]}"</h3>
             </div>
 
-            <div className={`min-h-[140px] p-8 bg-white dark:bg-slate-900/50 rounded-[3rem] border-2 border-dashed flex flex-wrap gap-3 items-center justify-center transition-colors ${challengeFeedback.type === 'error' ? 'border-rose-400 dark:border-rose-900/50' : 'border-stone-100 dark:border-slate-800'}`}>
-              {selectedWords.length === 0 && <p className="text-stone-400 dark:text-stone-600 font-black uppercase text-[10px] tracking-widest text-center">Appuyez sur les mots ci-dessous</p>}
+            <div className={`min-h-[140px] p-8 bg-white dark:bg-slate-900/50 rounded-[3rem] border-2 border-dashed flex flex-wrap gap-3 items-center justify-center transition-colors ${challengeFeedback.type === 'error' ? 'border-rose-400' : 'border-stone-100 dark:border-slate-800'}`}>
               {selectedWords.map((word, i) => (
                 <button
                   key={`${word}-${i}`}
                   onClick={() => handleWordClick(word, false)}
-                  className={`px-5 py-3.5 rounded-2xl font-black text-sm transition-all ${challengeFeedback.type === 'error' && i === challengeFeedback.errorIdx ? 'bg-rose-500 text-white shadow-lg animate-shake' : 'bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-stone-200'}`}
+                  className="px-5 py-3.5 rounded-2xl bg-[#00a884] text-white font-black text-sm shadow-lg shadow-emerald-500/10"
                 >
                   {word}
                 </button>
@@ -222,144 +234,143 @@ const GrammarScreen: React.FC<{ onBack: () => void; t: UIStrings; languagePair: 
                 <button
                   key={`${word}-${i}`}
                   onClick={() => handleWordClick(word, true)}
-                  className="px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 border-2 border-stone-50 dark:border-slate-800 text-stone-900 dark:text-stone-300 font-black text-sm active:scale-95 transition-all shadow-sm"
+                  className="px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 text-stone-900 dark:text-stone-300 font-black text-sm"
                 >
                   {word}
                 </button>
               ))}
             </div>
 
-            {challengeFeedback.message && (
-              <div className={`p-6 rounded-[2.5rem] border-2 animate-in slide-in-from-top-2 ${challengeFeedback.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/20 text-emerald-800 dark:text-emerald-400' : 'bg-amber-50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-900/20 text-amber-800 dark:text-amber-400'}`}>
-                <p className="text-sm font-bold text-center">{challengeFeedback.message}</p>
-              </div>
-            )}
-
             <button 
               onClick={checkSentence}
               disabled={selectedWords.length === 0}
-              className="w-full bg-brand text-white py-5 rounded-2xl font-black shadow-xl shadow-brand/20 active:scale-95 transition-all disabled:opacity-50 heading-brand uppercase tracking-widest text-[11px]"
+              className="w-full bg-[#00a884] text-white py-5 rounded-2xl font-black shadow-xl shadow-emerald-500/10 uppercase tracking-widest text-xs"
             >
               Vérifier
             </button>
           </div>
-        ) : (
-          <>
-            <div className="brand-gradient p-12 rounded-[3.5rem] text-white shadow-2xl shadow-brand/20 mb-6 relative overflow-hidden group">
-              <div className="relative z-10">
-                <h3 className="text-4xl font-black mb-2 heading-brand">{activeCategory.title[langKey]}</h3>
-                <p className="opacity-70 font-black uppercase tracking-[0.3em] text-[10px]">{activeCategory.title.pulaar}</p>
-              </div>
-              <div className="absolute -bottom-10 -right-10 text-9xl opacity-10 group-hover:scale-110 transition-transform duration-700">📘</div>
+        ) : activeTab === 'possessives' && possessiveSubTab === 'order' ? (
+          <div className="space-y-10 py-10 animate-in fade-in duration-500">
+            <div className="bg-white dark:bg-slate-900 p-10 rounded-[3.5rem] border border-stone-100 dark:border-slate-800 shadow-sm text-center">
+               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300 mb-2">TRADUISEZ</p>
+               <h3 className="text-3xl font-black text-stone-900 dark:text-white heading-brand">"{currentOrderChallenge?.back}"</h3>
             </div>
 
-            {/* Special Possessive Challenge Entry */}
-            {activeTab === 'possessives' && !isPossessivePractice && (
-              <div className="bg-amber-100/50 dark:bg-amber-900/10 p-8 rounded-[3rem] border-2 border-amber-200 dark:border-amber-900/20 flex flex-col sm:flex-row items-center justify-between gap-6 mb-10 transition-all hover:bg-amber-100 dark:hover:bg-amber-900/20">
-                <div className="flex items-center gap-5">
-                   <div className="w-14 h-14 bg-amber-500 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg">🧩</div>
-                   <div>
-                     <h4 className="text-lg font-black text-amber-900 dark:text-amber-400 heading-brand leading-none">Défi des Possessifs</h4>
-                     <p className="text-[10px] font-bold text-amber-700 dark:text-amber-500/70 uppercase tracking-widest mt-2">Pratiquez l'ordre Nom + Adjectif</p>
-                   </div>
+            <div className={`min-h-[120px] p-8 rounded-[3rem] border-2 border-dashed flex flex-wrap gap-4 items-center justify-center transition-all ${
+              orderFeedback.type === 'success' ? 'bg-emerald-50/50 border-emerald-400' : 
+              orderFeedback.type === 'error' ? 'bg-rose-50/50 border-rose-400 animate-shake' : 
+              'bg-white dark:bg-slate-900/50 border-stone-100 dark:border-slate-800'
+            }`}>
+              {selectedOrderWords.map((word, i) => (
+                <button
+                  key={`selected-${i}`}
+                  onClick={() => handleOrderWordClick(word, false)}
+                  className={`px-6 py-4 rounded-2xl font-black text-lg shadow-md transition-all ${
+                    orderFeedback.type === 'success' ? 'bg-[#00a884] text-white' : 'bg-white dark:bg-slate-800 text-stone-900 dark:text-white border border-stone-100 dark:border-slate-700'
+                  }`}
+                >
+                  {word}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-4 justify-center">
+              {availableOrderWords.map((word, i) => (
+                <button
+                  key={`avail-${i}`}
+                  onClick={() => handleOrderWordClick(word, true)}
+                  className="px-8 py-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-stone-100 dark:border-slate-800 text-stone-900 dark:text-stone-300 font-black text-lg shadow-sm hover:border-[#00a884]/30 active:scale-95 transition-all"
+                >
+                  {word}
+                </button>
+              ))}
+            </div>
+
+            {orderFeedback.type === 'success' && (
+              <div className="flex flex-col gap-4 animate-in slide-in-from-bottom-6 duration-500">
+                <div className="p-6 bg-emerald-500 text-white rounded-[2rem] text-center font-black uppercase tracking-widest text-sm shadow-xl shadow-emerald-500/20">
+                  {t.correct}
                 </div>
                 <button 
-                  onClick={() => { setIsPossessivePractice(true); setPossessiveIdx(0); }}
-                  className="px-8 py-4 bg-amber-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
+                  onClick={nextOrderChallenge}
+                  className="w-full bg-stone-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-all"
                 >
-                  Jouer
+                  {t.next}
                 </button>
               </div>
             )}
+            
+            <p className="text-center text-[10px] font-black text-stone-300 uppercase tracking-widest pt-10">
+              Conseil : En Pulaar, le possessif suit le nom.
+            </p>
+          </div>
+        ) : activeTab === 'possessives' && possessiveSubTab === 'practice' ? (
+          <div className="flex flex-col items-center gap-10 py-10">
+            <div className="perspective-1000 w-full max-w-[340px] aspect-[4/5]">
+               <div 
+                onClick={() => setIsFlipped(!isFlipped)}
+                className={`relative w-full h-full transition-transform duration-700 transform-style-3d cursor-pointer ${isFlipped ? 'rotate-y-180' : ''}`}
+               >
+                 <div className="absolute inset-0 bg-white dark:bg-slate-900 rounded-[3.5rem] shadow-2xl border border-stone-100 dark:border-slate-800 flex flex-col items-center justify-center p-12 backface-hidden">
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-stone-300 mb-10">PULAAR</span>
+                    <h3 className="text-4xl font-black text-stone-900 dark:text-white heading-brand text-center leading-tight">{derivedItems[currentFlashcardIdx]?.front}</h3>
+                    <div className="mt-12 w-14 h-14 rounded-full bg-emerald-50 dark:bg-emerald-900/10 flex items-center justify-center text-[#00a884]">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m15 18-6-6 6-6"/></svg>
+                    </div>
+                 </div>
+                 <div className="absolute inset-0 bg-[#00a884] rounded-[3.5rem] shadow-2xl flex flex-col items-center justify-center p-12 backface-hidden rotate-y-180">
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50 mb-10">{langKey.toUpperCase()}</span>
+                    <h3 className="text-4xl font-black text-white heading-brand text-center leading-tight">{derivedItems[currentFlashcardIdx]?.back}</h3>
+                 </div>
+               </div>
+            </div>
 
-            {/* Possessive Practice View */}
-            {activeTab === 'possessives' && isPossessivePractice && (
-              <div className="space-y-8 animate-in zoom-in-95 duration-500">
-                <div className="flex items-center justify-between px-4">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400">Pratique Interactive</h4>
-                  <button onClick={() => setIsPossessivePractice(false)} className="text-[10px] font-black uppercase tracking-widest text-rose-500">Quitter</button>
-                </div>
+            <div className="flex items-center gap-6 w-full max-w-[340px]">
+               <button onClick={() => { setIsFlipped(false); setCurrentFlashcardIdx(p => (p - 1 + derivedItems.length) % derivedItems.length); }} className="w-16 h-16 rounded-3xl bg-white dark:bg-slate-900 border border-stone-100 dark:border-slate-800 flex items-center justify-center text-stone-400 active:scale-95 transition-all">
+                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m15 18-6-6 6-6"/></svg>
+               </button>
+               <button onClick={() => setIsFlipped(!isFlipped)} className="flex-1 bg-[#00a884] text-white py-5 rounded-[2rem] font-black uppercase tracking-widest text-[10px] shadow-xl active:scale-95 transition-all">{t.flip}</button>
+               <button onClick={() => { setIsFlipped(false); setCurrentFlashcardIdx(p => (p + 1) % derivedItems.length); }} className="w-16 h-16 rounded-3xl bg-white dark:bg-slate-900 border border-stone-100 dark:border-slate-800 flex items-center justify-center text-stone-400 active:scale-95 transition-all">
+                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m9 18 6-6-6-6"/></svg>
+               </button>
+            </div>
+            <p className="text-[10px] font-black text-stone-300 uppercase tracking-widest">{currentFlashcardIdx + 1} / {derivedItems.length}</p>
+          </div>
+        ) : (
+          <>
+            <div className="bg-[#00a884] p-10 rounded-[3.5rem] text-white shadow-2xl shadow-emerald-500/10 relative overflow-hidden">
+               <h3 className="text-3xl font-black heading-brand mb-1">{activeCategory.title[langKey]}</h3>
+               <p className="opacity-60 font-black uppercase tracking-widest text-[10px]">{activeCategory.title.pulaar}</p>
+            </div>
 
-                <div className={`p-10 bg-white dark:bg-slate-900 rounded-[3rem] border-2 shadow-sm text-center transition-all ${pFeedback === 'success' ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : pFeedback === 'error' ? 'border-rose-500 animate-shake' : 'border-stone-100 dark:border-slate-800'}`}>
-                  <p className="text-[10px] font-black text-stone-400 uppercase tracking-[0.4em] mb-4">Traduisez :</p>
-                  <h3 className="text-3xl font-black text-stone-900 dark:text-white heading-brand mb-8 italic">"{possessiveExamples[possessiveIdx].translation}"</h3>
-                  
-                  <div className="min-h-[80px] flex flex-wrap gap-4 justify-center items-center border-t border-stone-100 dark:border-slate-800 pt-8">
-                    {pSelected.map((word, i) => (
-                      <div key={i} className="px-6 py-4 bg-brand text-white rounded-2xl font-black text-lg shadow-xl shadow-brand/20 animate-in zoom-in">
-                        {word}
-                      </div>
-                    ))}
-                    {pSelected.length === 0 && <div className="h-14 w-32 border-2 border-dashed border-stone-200 dark:border-slate-800 rounded-2xl"></div>}
-                  </div>
-                </div>
-
-                <div className="flex gap-4 justify-center py-4">
-                  {pAvailable.map((word, i) => (
-                    <button
-                      key={`${word}-${i}`}
-                      onClick={() => handlePossessiveWordClick(word)}
-                      className="px-8 py-5 bg-white dark:bg-slate-900 border-2 border-stone-100 dark:border-slate-800 rounded-3xl font-black text-xl text-stone-900 dark:text-stone-100 shadow-md active:scale-95 transition-all"
-                    >
-                      {word}
-                    </button>
-                  ))}
-                </div>
-
-                {pFeedback === 'success' && (
-                  <div className="text-center animate-in fade-in duration-500">
-                    <span className="text-4xl">✨</span>
-                    <p className="text-emerald-600 font-black mt-2 text-sm uppercase tracking-widest">Bravo !</p>
-                  </div>
-                )}
-                
-                <div className="flex justify-center pt-6">
-                   <div className="flex gap-1.5">
-                     {possessiveExamples.map((_, i) => (
-                       <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i === possessiveIdx ? 'w-8 bg-amber-500' : 'w-2 bg-stone-200 dark:bg-slate-800'}`}></div>
-                     ))}
-                   </div>
-                </div>
-              </div>
-            )}
-
-            {!isPossessivePractice && activeCategory.sections.map((section, sIdx) => {
+            {activeCategory.sections.map((section, sIdx) => {
               const sectionId = `${activeTab}-${sIdx}`;
               const isExpanded = expandedSections[sectionId];
               return (
-                <section key={sIdx} className="bg-white dark:bg-slate-900 rounded-[3rem] border border-stone-100 dark:border-slate-800 shadow-sm overflow-hidden mb-4 transition-all">
-                  <button onClick={() => toggleSection(sectionId)} className="w-full p-8 flex items-center justify-between text-left group">
-                    <div className="flex items-center gap-5">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all ${isExpanded ? 'bg-brand text-white shadow-lg' : 'bg-stone-50 dark:bg-slate-800 text-stone-400 group-hover:bg-stone-100'}`}>
-                        {activeTab === 'possessives' ? '👜' : activeTab === 'pronouns' ? '👤' : '⚡'}
-                      </div>
-                      <h4 className="text-xl font-black text-stone-900 dark:text-stone-100 heading-brand">{section.title[langKey]}</h4>
-                    </div>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`transition-transform duration-500 text-stone-300 ${isExpanded ? 'rotate-180 text-brand' : ''}`}><path d="m6 9 6 6 6-6"/></svg>
+                <div key={sIdx} className="bg-white dark:bg-slate-900 rounded-[3rem] border border-stone-100 dark:border-slate-800 shadow-sm overflow-hidden mb-4 transition-all">
+                  <button onClick={() => toggleSection(sectionId)} className="w-full p-8 flex items-center justify-between">
+                    <h4 className="text-lg font-black text-stone-900 dark:text-stone-100 heading-brand">{section.title[langKey]}</h4>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`transition-transform duration-500 text-stone-300 ${isExpanded ? 'rotate-180 text-[#00a884]' : ''}`}><path d="m6 9 6 6 6-6"/></svg>
                   </button>
                   {isExpanded && (
                     <div className="px-8 pb-10 space-y-4 animate-in slide-in-from-top-4 duration-500">
-                      <div className="h-px bg-stone-50 dark:bg-slate-800/50 mb-6"></div>
                       {section.items.map((item, iIdx) => (
-                        <div key={iIdx} className="bg-stone-50/50 dark:bg-slate-800/30 p-6 rounded-[2rem] flex items-center justify-between border border-stone-100 dark:border-slate-800 group hover:bg-white dark:hover:bg-slate-800 transition-all">
+                        <div key={iIdx} className="bg-stone-50 dark:bg-slate-800/30 p-6 rounded-[2rem] flex items-center justify-between group">
                           <div className="flex-1">
-                            <p className="font-black text-xl text-stone-900 dark:text-stone-100 heading-brand mb-1">{item.pulaar}</p>
-                            <p className="text-stone-500 dark:text-stone-400 text-sm font-bold italic">{item[langKey]}</p>
-                            {item.example && (
-                              <p className="text-[10px] text-brand/60 dark:text-stone-500 font-bold uppercase mt-3 tracking-widest">{item.example}</p>
-                            )}
+                            <p className="font-black text-lg text-stone-900 dark:text-stone-100 heading-brand">{item.pulaar}</p>
+                            <p className="text-stone-400 text-sm font-bold italic">{item[langKey]}</p>
                           </div>
                           <button 
                             onClick={() => handleSpeak(item.pulaar, 'Pulaar', `gram-${sIdx}-${iIdx}`)} 
-                            className={`w-12 h-12 rounded-xl transition-all flex items-center justify-center shadow-sm border border-stone-100 dark:border-slate-800 active:scale-90 ${isPlaying === `gram-${sIdx}-${iIdx}-Pulaar` ? 'bg-brand text-white' : 'bg-white dark:bg-slate-900 text-brand dark:text-stone-400'}`}
+                            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isPlaying === `gram-${sIdx}-${iIdx}-Pulaar` ? 'bg-[#00a884] text-white' : 'bg-white dark:bg-slate-800 text-[#00a884]'}`}
                           >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg>
                           </button>
                         </div>
                       ))}
                     </div>
                   )}
-                </section>
+                </div>
               );
             })}
           </>

@@ -57,7 +57,7 @@ const App: React.FC = () => {
   }, [languagePair]);
 
   useEffect(() => {
-    const DONATION_INTERVAL = 2 * 60 * 1000; // 2 minutes interval
+    const DONATION_INTERVAL = 10 * 60 * 1000;
     const intervalId = setInterval(() => {
       setIsDonationModalOpen(true);
     }, DONATION_INTERVAL);
@@ -69,8 +69,7 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const whatsappMessage = encodeURIComponent("Bonjour Janngu, je souhaite soutenir l'application Janngu Ɗemɗe.");
-  const whatsappUrl = `https://wa.me/22394650112?text=${whatsappMessage}`;
+  const whatsappUrl = `https://wa.me/22394650112?text=${encodeURIComponent("Bonjour Janngu, je souhaite soutenir l'application Janngu Ɗemɗe.")}`;
 
   const renderScreen = () => {
     const commonProps = { onBack: () => navigateTo(Screen.HOME), t };
@@ -95,47 +94,35 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-500 flex flex-col items-center selection:bg-[#2d4156] selection:text-white overflow-x-hidden">
-      <div className="w-full max-w-xl min-h-screen bg-white dark:bg-slate-900 sm:bg-stone-50 sm:dark:bg-slate-950 flex flex-col relative sm:shadow-[0_0_100px_rgba(0,0,0,0.05)] dark:sm:shadow-[0_0_100px_rgba(0,0,0,0.5)] sm:border-x sm:border-stone-200 dark:sm:border-slate-800 transition-colors duration-500">
+    <div className="h-screen bg-[#f8f9fa] dark:bg-slate-950 flex flex-col items-center selection:bg-brand selection:text-white">
+      <div className="w-full max-w-xl h-full flex flex-col relative sm:shadow-2xl dark:sm:shadow-none sm:border-x sm:border-stone-100 dark:sm:border-slate-800 transition-colors duration-500 overflow-hidden">
         
-        <main className="flex-1 pb-36 pt-[env(safe-area-inset-top,20px)] overflow-y-auto custom-scrollbar">
+        <main className="flex-1 overflow-y-auto no-scrollbar custom-scrollbar">
           {renderScreen()}
         </main>
 
-        <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none flex justify-center pb-[max(env(safe-area-inset-bottom),24px)] px-6">
-          <nav className="glass dark:bg-slate-900/95 pointer-events-auto border border-stone-200/60 dark:border-slate-800/80 rounded-[2.5rem] px-4 py-3 flex justify-around items-center shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] w-full max-w-md transition-all duration-500">
-            <NavButton active={currentScreen === Screen.HOME} onClick={() => navigateTo(Screen.HOME)} icon={<HomeIcon />} label={t.home} />
-            <NavButton active={currentScreen === Screen.LESSONS} onClick={() => navigateTo(Screen.LESSONS)} icon={<BookOpenIcon />} label={t.lessons} />
-            <NavButton active={currentScreen === Screen.QUIZ} onClick={() => navigateTo(Screen.QUIZ)} icon={<TrophyIcon />} label={t.quiz} />
-            <NavButton active={currentScreen === Screen.SETTINGS} onClick={() => navigateTo(Screen.SETTINGS)} icon={<SettingsIcon />} label={t.settings} />
-          </nav>
+        {/* Navigation bar following screenshot style */}
+        <div className="bg-white dark:bg-slate-900 border-t border-stone-100 dark:border-slate-800 px-6 py-2 flex justify-between items-center shadow-2xl z-50">
+          <NavButton active={currentScreen === Screen.HOME} onClick={() => navigateTo(Screen.HOME)} icon={<HomeIcon />} label={t.home} />
+          <NavButton active={currentScreen === Screen.LESSONS} onClick={() => navigateTo(Screen.LESSONS)} icon={<BookIcon />} label={t.lessons} />
+          <NavButton active={currentScreen === Screen.GRAMMAR} onClick={() => navigateTo(Screen.GRAMMAR)} icon={<LayersIcon />} label={t.grammar} />
+          <NavButton active={currentScreen === Screen.QUIZ} onClick={() => navigateTo(Screen.QUIZ)} icon={<TrophyIcon />} label={t.quiz} />
         </div>
 
         {isDonationModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
             <div className="absolute inset-0 bg-stone-950/80 backdrop-blur-md" onClick={() => setIsDonationModalOpen(false)}></div>
-            <div className="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-[3.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.6)] overflow-hidden animate-in zoom-in-95 duration-500 border border-white dark:border-slate-800">
-              <div className="brand-gradient p-12 flex flex-col items-center text-center text-white">
-                <div className="w-24 h-24 bg-white/20 rounded-[2rem] flex items-center justify-center text-5xl mb-8 backdrop-blur-xl border border-white/20 shadow-inner animate-float">
-                  💝
-                </div>
-                <h3 className="text-3xl font-black heading-brand mb-4 leading-none tracking-tight">{t.donation_title}</h3>
-                <p className="text-sm font-medium opacity-90 leading-relaxed px-2">{t.donation_msg}</p>
+            <div className="relative bg-white dark:bg-slate-900 w-full max-w-sm rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500 border border-white dark:border-slate-800">
+              <div className="bg-[#00a884] p-12 flex flex-col items-center text-center text-white">
+                <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-4xl mb-6 backdrop-blur-xl animate-float">💝</div>
+                <h3 className="text-2xl font-black heading-brand mb-4">{t.donation_title}</h3>
+                <p className="text-sm opacity-90 leading-relaxed">{t.donation_msg}</p>
               </div>
-              <div className="p-10 flex flex-col gap-4 bg-white dark:bg-slate-900">
-                <a 
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsDonationModalOpen(false)}
-                  className="w-full brand-gradient text-white py-5 rounded-2xl font-black text-center shadow-xl shadow-[#2d4156]/30 active:scale-95 transition-all heading-brand"
-                >
+              <div className="p-10 flex flex-col gap-4">
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={() => setIsDonationModalOpen(false)} className="w-full bg-[#00a884] text-white py-5 rounded-2xl font-black text-center shadow-xl heading-brand">
                   {t.donation_btn}
                 </a>
-                <button 
-                  onClick={() => setIsDonationModalOpen(false)}
-                  className="w-full text-stone-600 dark:text-stone-400 py-2 font-black text-[10px] uppercase tracking-[0.3em] hover:opacity-100 transition-opacity"
-                >
+                <button onClick={() => setIsDonationModalOpen(false)} className="w-full text-stone-400 py-2 font-black text-[10px] uppercase tracking-widest">
                   {t.close}
                 </button>
               </div>
@@ -150,20 +137,20 @@ const App: React.FC = () => {
 const NavButton: React.FC<{ active: boolean; onClick: () => void; icon: React.ReactNode; label: string }> = ({ active, onClick, icon, label }) => (
   <button 
     onClick={onClick}
-    className={`flex flex-col items-center gap-1.5 transition-all duration-300 relative group p-2 min-w-[64px] ${active ? 'scale-105' : 'opacity-60 hover:opacity-100'}`}
+    className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${active ? 'text-[#00a884]' : 'text-stone-400 dark:text-stone-600'}`}
   >
-    <div className={`p-2.5 rounded-2xl transition-all duration-500 ${active ? 'bg-[#2d4156] text-white shadow-xl active-nav-glow scale-110' : 'text-stone-800 dark:text-stone-400'}`}>
+    <div className={`transition-all duration-300 ${active ? 'scale-110' : ''}`}>
       {icon}
     </div>
-    <span className={`text-[9px] font-black uppercase tracking-widest transition-all duration-300 ${active ? 'text-[#2d4156] dark:text-white opacity-100' : 'opacity-0'}`}>
+    <span className="text-[10px] font-black uppercase tracking-tight">
       {label}
     </span>
   </button>
 );
 
-const HomeIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
-const BookOpenIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>;
-const TrophyIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>;
-const SettingsIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+const HomeIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+const BookIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
+const LayersIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>;
+const TrophyIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>;
 
 export default App;

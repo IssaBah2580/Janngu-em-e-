@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#2d4156">
+  <meta name="theme-color" content="#00a884">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Janngu">
@@ -21,9 +21,9 @@
           },
           colors: {
             brand: {
-              DEFAULT: '#2d4156',
-              light: '#3d5875',
-              dark: '#1a2633',
+              DEFAULT: '#00a884',
+              light: '#05c79d',
+              dark: '#008a6d',
             }
           }
         }
@@ -42,8 +42,9 @@
   </script>
   <style>
     :root {
-      --brand: #2d4156;
-      --brand-dark: #1a2633;
+      --brand: #00a884;
+      --brand-dark: #008a6d;
+      --bg-light: #f8f9fa;
     }
     html, body {
       height: 100%;
@@ -53,6 +54,7 @@
     }
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-light);
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: contain;
       transition: background-color 0.4s ease, color 0.4s ease;
@@ -68,7 +70,7 @@
     .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
     
     .glass {
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
     }
@@ -92,17 +94,8 @@
     }
     .animate-float { animation: float 4s ease-in-out infinite; }
 
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-      20%, 40%, 60%, 80% { transform: translateX(4px); }
-    }
-    .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
-
-    .perspective-1000 { perspective: 1000px; }
-    .transform-style-3d { transform-style: preserve-3d; }
-    .backface-hidden { backface-visibility: hidden; }
-    .rotate-y-180 { transform: rotateY(180deg); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
     /* Fix transitions for color accessibility */
     * { transition: border-color 0.2s ease, background-color 0.4s ease-in-out, color 0.2s ease; }
@@ -121,7 +114,7 @@
 }
 </script>
 </head>
-<body class="bg-white dark:bg-slate-950 text-stone-900 dark:text-stone-100 select-none antialiased overflow-hidden">
+<body class="bg-[#f8f9fa] dark:bg-slate-950 text-stone-900 dark:text-stone-100 select-none antialiased overflow-hidden">
   <div id="root"></div>
   <script type="module" src="index.tsx"></script>
 </body>

@@ -53,6 +53,16 @@ export type UIStrings = {
   version: string;
   teach_friend: string;
   teach_friend_desc: string;
+  flashcards: string;
+  flip: string;
+  practice_mode: string;
+  list_mode: string;
+  next: string;
+  prev: string;
+  order_challenge: string;
+  check: string;
+  correct: string;
+  wrong_order: string;
 };
 
 const translations: Record<string, UIStrings> = {
@@ -108,7 +118,17 @@ const translations: Record<string, UIStrings> = {
     privacy_policy: "Politique de confidentialité",
     version: "Version",
     teach_friend: "Enseigner à un ami",
-    teach_friend_desc: "Partagez la culture avec vos proches."
+    teach_friend_desc: "Partagez la culture avec vos proches.",
+    flashcards: "Cartes Mémoire",
+    flip: "Retourner",
+    practice_mode: "Pratique",
+    list_mode: "Liste",
+    next: "Suivant",
+    prev: "Précédent",
+    order_challenge: "Défi d'Ordre",
+    check: "Vérifier",
+    correct: "Excellent !",
+    wrong_order: "L'ordre est incorrect."
   },
   en: {
     home: "Home",
@@ -162,7 +182,17 @@ const translations: Record<string, UIStrings> = {
     privacy_policy: "Privacy Policy",
     version: "Version",
     teach_friend: "Teach a friend",
-    teach_friend_desc: "Share the culture with your loved ones."
+    teach_friend_desc: "Share the culture with your loved ones.",
+    flashcards: "Flashcards",
+    flip: "Flip",
+    practice_mode: "Practice",
+    list_mode: "List",
+    next: "Next",
+    prev: "Prev",
+    order_challenge: "Order Challenge",
+    check: "Check",
+    correct: "Great job!",
+    wrong_order: "Incorrect order."
   },
   es: {
     home: "Inicio",
@@ -208,15 +238,25 @@ const translations: Record<string, UIStrings> = {
     install_btn: "Instalar ahora",
     ios_install_hint: "En iOS: Toca Compartir, luego 'Añadir a pantalla de inicio'",
     donation_title: "Apoya el Proyecto",
-    donation_msg: "Janngu está en pleno desarrollo. Tu donación nos ayuda a crear más contenido gratuito para la cultura Pulaar.",
+    donation_msg: "Janngu está en pleno desarrollo. Tu donación nos ayuda a créer más contenido gratuito para la cultura Pulaar.",
     donation_btn: "Hacer una donación",
     close: "Cerrar",
     about_app: "Acerca de Janngu Ɗemɗe",
     app_desc_full: "Janngu Ɗemɗe es una plataforma moderna para aprender lenguas africanas, empezando por el Pulaar, con lecciones interactivas, proverbios y cuestionarios.",
     privacy_policy: "Política de privacidad",
-    version: "Versión",
-    teach_friend: "Enseñar a un amigo",
-    teach_friend_desc: "Comparte la cultura con tus seres queridos."
+    version: "Version",
+    teach_friend: "Enseñar a un ami",
+    teach_friend_desc: "Comparte la cultura con tus seres queridos.",
+    flashcards: "Tarjetas",
+    flip: "Girar",
+    practice_mode: "Práctica",
+    list_mode: "Lista",
+    next: "Siguiente",
+    prev: "Anterior",
+    order_challenge: "Desafío de Orden",
+    check: "Verificar",
+    correct: "¡Excelente!",
+    wrong_order: "El orden es incorrecto."
   },
   ar: {
     home: "الرئيسية",
@@ -249,7 +289,7 @@ const translations: Record<string, UIStrings> = {
     contact_wa: "اتصال واتساب",
     follow_us: "تابعنا",
     offline_mode: "وضع عدم الاتصال",
-    offline_desc: "الدروس والاختبارات متاحة بدون إنترنت.",
+    offline_desc: "الدروس والاختبارات متاح بدون إنترنت.",
     internet_required: "الإنترنت مطلوب للصوت (TTS).",
     other_apps: "تطبيقاتي الأخرى",
     dictionary: "قاموس بولار",
@@ -270,7 +310,17 @@ const translations: Record<string, UIStrings> = {
     privacy_policy: "سياسة الخصوصية",
     version: "الإصدار",
     teach_friend: "علم صديقاً",
-    teach_friend_desc: "شارك الثقافة مع أحبائك."
+    teach_friend_desc: "شارك الثقافة مع أحبائك.",
+    flashcards: "بطاقات",
+    flip: "قلب",
+    practice_mode: "ممارسة",
+    list_mode: "قائمة",
+    next: "التالي",
+    prev: "السابق",
+    order_challenge: "تحدي الترتيب",
+    check: "تحقق",
+    correct: "عمل رائع!",
+    wrong_order: "الترتيب غير صحيح."
   }
 };
 
