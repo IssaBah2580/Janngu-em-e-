@@ -63,6 +63,15 @@ export type UIStrings = {
   check: string;
   correct: string;
   wrong_order: string;
+  ai_tutor: string;
+  ai_tutor_hint: string;
+  type_question: string;
+  send: string;
+  ai_tutor_intro: string;
+  conjugation: string;
+  select_correct: string;
+  search_placeholder: string;
+  no_results: string;
 };
 
 const translations: Record<string, UIStrings> = {
@@ -128,7 +137,16 @@ const translations: Record<string, UIStrings> = {
     order_challenge: "Défi d'Ordre",
     check: "Vérifier",
     correct: "Excellent !",
-    wrong_order: "L'ordre est incorrect."
+    wrong_order: "L'ordre est incorrect.",
+    ai_tutor: "Balla, Tuteur AI",
+    ai_tutor_hint: "Posez-moi une question sur le Pulaar...",
+    type_question: "Votre question...",
+    send: "Envoyer",
+    ai_tutor_intro: "Mbaaw-mi wallude ma? (Comment puis-je vous aider ?)",
+    conjugation: "Conjugaison",
+    select_correct: "Choisissez la bonne forme :",
+    search_placeholder: "Rechercher un mot ou proverbe...",
+    no_results: "Aucun résultat trouvé."
   },
   en: {
     home: "Home",
@@ -192,7 +210,16 @@ const translations: Record<string, UIStrings> = {
     order_challenge: "Order Challenge",
     check: "Check",
     correct: "Great job!",
-    wrong_order: "Incorrect order."
+    wrong_order: "Incorrect order.",
+    ai_tutor: "Balla, AI Tutor",
+    ai_tutor_hint: "Ask me anything about Pulaar...",
+    type_question: "Type your question...",
+    send: "Send",
+    ai_tutor_intro: "Mbaaw-mi wallude ma? (How can I help you?)",
+    conjugation: "Conjugation",
+    select_correct: "Select the correct form:",
+    search_placeholder: "Search word or proverb...",
+    no_results: "No results found."
   },
   es: {
     home: "Inicio",
@@ -232,7 +259,7 @@ const translations: Record<string, UIStrings> = {
     word_search: "Sopa de letras Pulaar",
     calendar: "Calendario Pulaar",
     dark_mode: "Modo Noche",
-    appearance: "Apariencia",
+    appearance: "Appariencia",
     install_app: "Instalar aplicación",
     install_desc: "Usa Janngu como una app nativa en tu pantalla de inicio.",
     install_btn: "Instalar ahora",
@@ -256,7 +283,16 @@ const translations: Record<string, UIStrings> = {
     order_challenge: "Desafío de Orden",
     check: "Verificar",
     correct: "¡Excelente!",
-    wrong_order: "El orden es incorrecto."
+    wrong_order: "El orden es incorrecto.",
+    ai_tutor: "Balla, Tutor AI",
+    ai_tutor_hint: "Pregúntame cualquier cosa sobre Pulaar...",
+    type_question: "Escribe tu pregunta...",
+    send: "Enviar",
+    ai_tutor_intro: "Mbaaw-mi wallude ma? (¿Cómo puedo ayudarte?)",
+    conjugation: "Conjugación",
+    select_correct: "Selecciona la forma correcta:",
+    search_placeholder: "Buscar palabra o proverbio...",
+    no_results: "No se encontraron resultados."
   },
   ar: {
     home: "الرئيسية",
@@ -320,7 +356,16 @@ const translations: Record<string, UIStrings> = {
     order_challenge: "تحدي الترتيب",
     check: "تحقق",
     correct: "عمل رائع!",
-    wrong_order: "الترتيب غير صحيح."
+    wrong_order: "الترتيب غير صحيح.",
+    ai_tutor: "بالا، معلم ذكي",
+    ai_tutor_hint: "اسألني أي شيء عن البولار...",
+    type_question: "اكتب سؤالك...",
+    send: "إرسال",
+    ai_tutor_intro: "Mbaaw-mi wallude ma? (كيف يمكنني مساعدتك؟)",
+    conjugation: "تصريف الأفعال",
+    select_correct: "اختر الصيغة الصحيحة:",
+    search_placeholder: "ابحث عن كلمة أو مثل...",
+    no_results: "لم يتم العثور على نتائج."
   }
 };
 

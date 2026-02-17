@@ -7,6 +7,7 @@ import LessonsScreen from './screens/LessonsScreen.tsx';
 import GrammarScreen from './screens/GrammarScreen.tsx';
 import QuizScreen from './screens/QuizScreen.tsx';
 import SettingsScreen from './screens/SettingsScreen.tsx';
+import TutorScreen from './screens/TutorScreen.tsx';
 
 const detectInitialLanguage = (): LanguagePair => {
   try {
@@ -57,7 +58,7 @@ const App: React.FC = () => {
   }, [languagePair]);
 
   useEffect(() => {
-    const DONATION_INTERVAL = 10 * 60 * 1000;
+    const DONATION_INTERVAL = 15 * 60 * 1000;
     const intervalId = setInterval(() => {
       setIsDonationModalOpen(true);
     }, DONATION_INTERVAL);
@@ -79,6 +80,7 @@ const App: React.FC = () => {
       case Screen.LESSONS: return <LessonsScreen {...commonProps} languagePair={languagePair} />;
       case Screen.GRAMMAR: return <GrammarScreen {...commonProps} languagePair={languagePair} />;
       case Screen.QUIZ: return <QuizScreen {...commonProps} languagePair={languagePair} />;
+      case Screen.TUTOR: return <TutorScreen t={t} languagePair={languagePair} />;
       case Screen.SETTINGS: return (
         <SettingsScreen 
           onBack={() => navigateTo(Screen.HOME)} 
@@ -101,10 +103,11 @@ const App: React.FC = () => {
           {renderScreen()}
         </main>
 
-        {/* Navigation bar following screenshot style */}
-        <div className="bg-white dark:bg-slate-900 border-t border-stone-100 dark:border-slate-800 px-6 py-2 flex justify-between items-center shadow-2xl z-50">
+        {/* Navigation bar */}
+        <div className="bg-white dark:bg-slate-900 border-t border-stone-100 dark:border-slate-800 px-4 py-2 flex justify-between items-center shadow-2xl z-50">
           <NavButton active={currentScreen === Screen.HOME} onClick={() => navigateTo(Screen.HOME)} icon={<HomeIcon />} label={t.home} />
           <NavButton active={currentScreen === Screen.LESSONS} onClick={() => navigateTo(Screen.LESSONS)} icon={<BookIcon />} label={t.lessons} />
+          <NavButton active={currentScreen === Screen.TUTOR} onClick={() => navigateTo(Screen.TUTOR)} icon={<ChatIcon />} label="Balla" />
           <NavButton active={currentScreen === Screen.GRAMMAR} onClick={() => navigateTo(Screen.GRAMMAR)} icon={<LayersIcon />} label={t.grammar} />
           <NavButton active={currentScreen === Screen.QUIZ} onClick={() => navigateTo(Screen.QUIZ)} icon={<TrophyIcon />} label={t.quiz} />
         </div>
@@ -139,18 +142,19 @@ const NavButton: React.FC<{ active: boolean; onClick: () => void; icon: React.Re
     onClick={onClick}
     className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${active ? 'text-[#00a884]' : 'text-stone-400 dark:text-stone-600'}`}
   >
-    <div className={`transition-all duration-300 ${active ? 'scale-110' : ''}`}>
+    <div className={`transition-all duration-300 ${active ? 'scale-110 translate-y-[-2px]' : ''}`}>
       {icon}
     </div>
-    <span className="text-[10px] font-black uppercase tracking-tight">
+    <span className="text-[9px] font-black uppercase tracking-tight">
       {label}
     </span>
   </button>
 );
 
-const HomeIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
-const BookIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
-const LayersIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>;
-const TrophyIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>;
+const HomeIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+const BookIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
+const ChatIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
+const LayersIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>;
+const TrophyIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>;
 
 export default App;

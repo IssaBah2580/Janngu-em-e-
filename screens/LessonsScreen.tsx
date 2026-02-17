@@ -8,6 +8,7 @@ const LessonsScreen: React.FC<{ onBack: () => void; languagePair: LanguagePair; 
   const [selectedLesson, setSelectedLesson] = useState(LESSONS[0]);
   const [activeMode, setActiveMode] = useState<'vocab' | 'dialogue'>('vocab');
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const getLanguageName = () => {
     if (languagePair.includes('FRENCH')) return 'French';
@@ -39,6 +40,17 @@ const LessonsScreen: React.FC<{ onBack: () => void; languagePair: LanguagePair; 
     }
   };
 
+  const filteredVocabulary = useMemo(() => {
+    const vocab = selectedLesson.vocabulary || [];
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return vocab;
+    return vocab.filter(v => {
+      const pulaarMatch = v.pulaar.toLowerCase().includes(query);
+      const translationMatch = getActiveTranslation(v).toLowerCase().includes(query);
+      return pulaarMatch || translationMatch;
+    });
+  }, [selectedLesson, searchQuery, languagePair]);
+
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fa] dark:bg-slate-950 transition-colors">
       {/* Top Navigation Bar */}
@@ -62,7 +74,10 @@ const LessonsScreen: React.FC<{ onBack: () => void; languagePair: LanguagePair; 
           {LESSONS.map((lesson) => (
             <button
               key={lesson.id}
-              onClick={() => setSelectedLesson(lesson)}
+              onClick={() => {
+                setSelectedLesson(lesson);
+                setSearchQuery('');
+              }}
               className={`px-6 py-2.5 rounded-full font-bold text-sm whitespace-nowrap transition-all ${
                 selectedLesson.id === lesson.id
                   ? 'bg-[#00a884] text-white shadow-md'
@@ -118,41 +133,68 @@ const LessonsScreen: React.FC<{ onBack: () => void; languagePair: LanguagePair; 
 
         {activeMode === 'vocab' ? (
           <div className="space-y-6">
-            <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">
-                  <ListIcon />
-                </div>
-                <div>
-                  <h4 className="text-xl font-black text-stone-900 dark:text-stone-100 leading-none">Vocabulaire</h4>
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-tight mt-1">Les mots essentiels</p>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">
+                    <ListIcon />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-black text-stone-900 dark:text-stone-100 leading-none">Vocabulaire</h4>
+                    <p className="text-[10px] font-bold text-stone-400 uppercase tracking-tight mt-1">Les mots essentiels</p>
+                  </div>
                 </div>
               </div>
-              <div className="flex bg-white dark:bg-slate-900 p-1 rounded-2xl shadow-sm border border-stone-100 dark:border-slate-800">
-                <button className="p-2 rounded-xl bg-stone-50 dark:bg-slate-800 text-stone-900 dark:text-white shadow-sm"><ListIcon /></button>
-                <button className="p-2 rounded-xl text-stone-300 dark:text-stone-600"><GridIcon /></button>
+
+              {/* Search Bar */}
+              <div className="relative group px-2">
+                <input 
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t.search_placeholder}
+                  className="w-full bg-white dark:bg-slate-900 border border-stone-100 dark:border-slate-800 rounded-2xl py-3 px-12 text-sm font-bold text-stone-900 dark:text-white placeholder:text-stone-400 focus:ring-2 focus:ring-[#00a884]/20 transition-all shadow-sm"
+                />
+                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-[#00a884] transition-colors">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-6 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  </button>
+                )}
               </div>
             </div>
 
             <div className="grid gap-4">
-              {selectedLesson.vocabulary?.map((v, i) => {
-                const translation = getActiveTranslation(v);
-                const isItemPlaying = isPlaying?.includes(`vocab-${i}-Pulaar`);
-                return (
-                  <div key={i} className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] flex items-center justify-between border border-stone-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
-                    <div className="flex-1">
-                      <p className="font-black text-xl text-stone-900 dark:text-stone-100 heading-brand mb-1">{v.pulaar}</p>
-                      <p className="text-stone-400 dark:text-stone-500 text-sm font-bold">{translation}</p>
+              {filteredVocabulary.length > 0 ? (
+                filteredVocabulary.map((v, i) => {
+                  const translation = getActiveTranslation(v);
+                  const isItemPlaying = isPlaying?.includes(`vocab-${i}-Pulaar`);
+                  return (
+                    <div key={i} className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] flex items-center justify-between border border-stone-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all active:scale-[0.98] animate-in fade-in duration-300">
+                      <div className="flex-1">
+                        <p className="font-black text-xl text-stone-900 dark:text-stone-100 heading-brand mb-1">{v.pulaar}</p>
+                        <p className="text-stone-400 dark:text-stone-500 text-sm font-bold">{translation}</p>
+                      </div>
+                      <button 
+                        onClick={() => handleSpeak(v.pulaar, 'Pulaar', `vocab-${i}`)}
+                        className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isItemPlaying ? 'bg-[#00a884] text-white' : 'bg-[#f0f3f5] dark:bg-slate-800 text-[#00a884] dark:text-emerald-500'}`}
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                      </button>
                     </div>
-                    <button 
-                      onClick={() => handleSpeak(v.pulaar, 'Pulaar', `vocab-${i}`)}
-                      className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isItemPlaying ? 'bg-[#00a884] text-white' : 'bg-[#f0f3f5] dark:bg-slate-800 text-[#00a884] dark:text-emerald-500'}`}
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                    </button>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <div className="flex flex-col items-center justify-center py-10 text-center animate-in zoom-in-95 duration-300">
+                  <div className="w-16 h-16 bg-stone-100 dark:bg-slate-900 rounded-full flex items-center justify-center text-3xl mb-4">🔍</div>
+                  <h3 className="text-lg font-black text-stone-900 dark:text-white heading-brand">{t.no_results}</h3>
+                </div>
+              )}
             </div>
           </div>
         ) : (

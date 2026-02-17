@@ -4,7 +4,8 @@ export enum Screen {
   LESSONS = 'LESSONS',
   GRAMMAR = 'GRAMMAR',
   QUIZ = 'QUIZ',
-  SETTINGS = 'SETTINGS'
+  SETTINGS = 'SETTINGS',
+  TUTOR = 'TUTOR'
 }
 
 export enum LanguagePair {
