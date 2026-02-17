@@ -25,6 +25,15 @@
               light: '#05c79d',
               dark: '#008a6d',
             }
+          },
+          keyframes: {
+            'typing-dot': {
+              '0%, 100%': { transform: 'translateY(0)', opacity: '0.4' },
+              '50%': { transform: 'translateY(-4px)', opacity: '1' },
+            }
+          },
+          animation: {
+            'typing-dot': 'typing-dot 1.2s infinite ease-in-out',
           }
         }
       }

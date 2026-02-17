@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { UIStrings } from '../i18n.ts';
 import { speakText } from '../services/geminiService.ts';
@@ -29,6 +30,7 @@ const GrammarScreen: React.FC<{ onBack: () => void; t: UIStrings; languagePair: 
   const [availableOrderWords, setAvailableOrderWords] = useState<string[]>([]);
   const [orderFeedback, setOrderFeedback] = useState<{ type: 'success' | 'error' | null }>({ type: null });
   const [draggedWord, setDraggedWord] = useState<string | null>(null);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   // Verb Conjugation states
   const [verbChallengeIdx, setVerbChallengeIdx] = useState(0);
@@ -157,10 +159,16 @@ const GrammarScreen: React.FC<{ onBack: () => void; t: UIStrings; languagePair: 
 
   const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    setIsDraggingOver(true);
+  };
+
+  const onDragLeave = () => {
+    setIsDraggingOver(false);
   };
 
   const onDropToSlots = (e: React.DragEvent) => {
     e.preventDefault();
+    setIsDraggingOver(false);
     if (draggedWord) {
       handleOrderWordClick(draggedWord, true);
       setDraggedWord(null);
@@ -386,30 +394,68 @@ const GrammarScreen: React.FC<{ onBack: () => void; t: UIStrings; languagePair: 
                <h3 className="text-3xl font-black text-stone-900 dark:text-white heading-brand leading-tight">"{currentOrderChallenge?.back}"</h3>
             </div>
 
-            <div onDragOver={onDragOver} onDrop={onDropToSlots} className={`min-h-[140px] p-8 rounded-[3.5rem] border-4 border-dashed flex flex-wrap gap-6 items-center justify-center transition-all duration-300 ${orderFeedback.type === 'success' ? 'bg-emerald-50 border-emerald-400 dark:bg-emerald-900/10' : orderFeedback.type === 'error' ? 'bg-rose-50 border-rose-400 dark:bg-rose-900/10 animate-shake' : 'bg-white dark:bg-slate-900/50 border-stone-200 dark:border-slate-800'}`}>
+            {/* Tactile Drop Zone */}
+            <div 
+              onDragOver={onDragOver} 
+              onDragLeave={onDragLeave}
+              onDrop={onDropToSlots} 
+              className={`min-h-[160px] p-8 rounded-[3.5rem] border-4 border-dashed flex flex-wrap gap-6 items-center justify-center transition-all duration-300 ${
+                isDraggingOver ? 'bg-[#00a884]/5 border-[#00a884] scale-[1.02]' : 
+                orderFeedback.type === 'success' ? 'bg-emerald-50 border-emerald-400 dark:bg-emerald-900/10' : 
+                orderFeedback.type === 'error' ? 'bg-rose-50 border-rose-400 dark:bg-rose-900/10 animate-shake' : 
+                'bg-white dark:bg-slate-900/50 border-stone-200 dark:border-slate-800'
+              }`}
+            >
               {currentOrderChallenge?.pulaarParts.map((_, i) => (
-                <div key={`slot-${i}`} className={`w-32 h-16 rounded-3xl flex items-center justify-center transition-all ${selectedOrderWords[i] ? 'bg-transparent' : 'bg-stone-50 dark:bg-slate-800/50 border-2 border-stone-100 dark:border-slate-700 border-dotted'}`}>
+                <div key={`slot-${i}`} className={`w-36 h-20 rounded-3xl flex items-center justify-center transition-all ${selectedOrderWords[i] ? 'bg-transparent' : 'bg-stone-50 dark:bg-slate-800/50 border-2 border-stone-100 dark:border-slate-700 border-dotted'}`}>
                   {selectedOrderWords[i] ? (
-                    <button onClick={() => handleOrderWordClick(selectedOrderWords[i], false)} className={`w-full h-full rounded-2xl font-black text-lg shadow-xl transition-all transform hover:scale-105 active:scale-95 ${orderFeedback.type === 'success' ? 'bg-[#00a884] text-white' : 'bg-white dark:bg-slate-800 text-stone-900 dark:text-white border border-stone-100 dark:border-slate-700'}`}>{selectedOrderWords[i]}</button>
-                  ) : <span className="text-stone-300 dark:text-stone-700 text-[10px] font-black uppercase tracking-widest">{i + 1}</span>}
+                    <button onClick={() => handleOrderWordClick(selectedOrderWords[i], false)} className={`w-full h-full rounded-3xl font-black text-xl shadow-xl transition-all transform hover:scale-105 active:scale-95 ${orderFeedback.type === 'success' ? 'bg-[#00a884] text-white' : 'bg-white dark:bg-slate-800 text-stone-900 dark:text-white border border-stone-100 dark:border-slate-700'}`}>
+                      {selectedOrderWords[i]}
+                    </button>
+                  ) : (
+                    <span className="text-stone-300 dark:text-stone-700 text-[10px] font-black uppercase tracking-widest">{i + 1}</span>
+                  )}
                 </div>
               ))}
             </div>
 
+            {/* Draggable Words */}
             <div className="flex flex-wrap gap-6 justify-center">
               {availableOrderWords.map((word, i) => (
-                <button key={`avail-${i}`} draggable onDragStart={() => onDragStart(word)} onClick={() => handleOrderWordClick(word, true)} className="px-10 py-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-stone-100 dark:border-slate-800 text-stone-900 dark:text-stone-300 font-black text-xl shadow-lg hover:border-[#00a884]/40 hover:scale-105 active:scale-95 transition-all cursor-grab active:cursor-grabbing">{word}</button>
+                <div
+                  key={`avail-container-${i}`}
+                  className="relative group"
+                >
+                  <button 
+                    draggable 
+                    onDragStart={() => onDragStart(word)} 
+                    onClick={() => handleOrderWordClick(word, true)} 
+                    className="px-10 py-6 rounded-3xl bg-white dark:bg-slate-900 border-2 border-stone-100 dark:border-slate-800 text-stone-900 dark:text-stone-300 font-black text-2xl shadow-lg hover:border-[#00a884]/40 hover:scale-105 active:scale-95 transition-all cursor-grab active:cursor-grabbing flex items-center gap-3"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-stone-300 group-hover:text-[#00a884] transition-colors"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                    {word}
+                  </button>
+                </div>
               ))}
             </div>
 
             {orderFeedback.type === 'success' && (
               <div className="flex flex-col gap-4 animate-in slide-in-from-bottom-8 duration-700">
-                <div className="p-8 bg-[#00a884] text-white rounded-[2.5rem] text-center font-black uppercase tracking-widest text-xs shadow-2xl shadow-emerald-500/30 flex items-center justify-center gap-4"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="20 6 9 17 4 12"/></svg>{t.correct}</div>
-                <button onClick={nextOrderChallenge} className="w-full bg-stone-950 text-white py-6 rounded-3xl font-black uppercase tracking-widest text-sm shadow-2xl active:scale-95 transition-all transform">{t.next}</button>
+                <div className="p-8 bg-[#00a884] text-white rounded-[2.5rem] text-center font-black uppercase tracking-widest text-xs shadow-2xl shadow-emerald-500/30 flex items-center justify-center gap-4">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="20 6 9 17 4 12"/></svg>
+                  {t.correct}
+                </div>
+                <button onClick={nextOrderChallenge} className="w-full bg-stone-950 text-white py-6 rounded-3xl font-black uppercase tracking-widest text-sm shadow-2xl active:scale-95 transition-all transform">
+                  {t.next}
+                </button>
               </div>
             )}
             
-            <div className="bg-stone-50 dark:bg-slate-900/50 p-6 rounded-[2.5rem] border border-stone-100 dark:border-slate-800"><p className="text-center text-[11px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest leading-relaxed"><span className="text-[#00a884]">ASTUCE :</span> EN PULAAR, LE POSSESSIF SE PLACE TOUJOURS APRÈS LE NOM.</p></div>
+            <div className="bg-emerald-50/50 dark:bg-emerald-950/20 p-8 rounded-[3rem] border border-emerald-100 dark:border-emerald-900/30">
+              <p className="text-center text-[11px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest leading-relaxed">
+                <span className="text-[#00a884]">LOGIQUE :</span> EN PULAAR, LE POSSESSIF (<span className="italic">jeyirɗo</span>) SE PLACE TOUJOURS APRÈS LE NOM.
+              </p>
+            </div>
           </div>
         ) : activeTab === 'possessives' && possessiveSubTab === 'practice' ? (
           <div className="flex flex-col items-center gap-10 py-10">
@@ -446,6 +492,22 @@ const GrammarScreen: React.FC<{ onBack: () => void; t: UIStrings; languagePair: 
                           <button onClick={() => handleSpeak(item.pulaar, 'Pulaar', `gram-${sIdx}-${iIdx}`)} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isPlaying === `gram-${sIdx}-${iIdx}-Pulaar` ? 'bg-[#00a884] text-white' : 'bg-white dark:bg-slate-800 text-[#00a884]'}`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg></button>
                         </div>
                       ))}
+
+                      {/* Integrated Interactive Challenge Card for Possessives */}
+                      {activeTab === 'possessives' && (
+                        <div className="pt-6">
+                           <button 
+                            onClick={() => setPossessiveSubTab('order')}
+                            className="w-full bg-stone-900 dark:bg-stone-100 p-8 rounded-[2.5rem] flex items-center justify-between group active:scale-[0.98] transition-all shadow-xl"
+                           >
+                             <div className="text-left">
+                               <h5 className="text-white dark:text-stone-900 font-black heading-brand text-lg leading-none mb-1">Défi Interactif</h5>
+                               <p className="text-stone-400 dark:text-stone-500 text-[10px] font-black uppercase tracking-widest">Maîtrisez l'ordre des mots</p>
+                             </div>
+                             <div className="w-12 h-12 rounded-2xl bg-[#00a884] flex items-center justify-center text-white text-xl shadow-lg shadow-emerald-500/20 group-hover:rotate-12 transition-transform">🧩</div>
+                           </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

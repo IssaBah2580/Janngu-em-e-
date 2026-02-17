@@ -95,11 +95,12 @@ const TutorScreen: React.FC<TutorScreenProps> = ({ t, languagePair }) => {
           </div>
         ))}
         {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-[2rem] rounded-tl-lg border border-stone-100 dark:border-slate-800 shadow-sm flex items-center gap-2">
-              <div className="w-2 h-2 bg-[#00a884] rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-[#00a884] rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="w-2 h-2 bg-[#00a884] rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+          <div className="flex justify-start items-end gap-2">
+            <div className="w-8 h-8 bg-stone-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-sm shadow-sm">🤖</div>
+            <div className="bg-white dark:bg-slate-900 p-4 px-6 rounded-[2rem] rounded-tl-lg border border-stone-100 dark:border-slate-800 shadow-sm flex items-center gap-1.5 h-12">
+              <div className="w-1.5 h-1.5 bg-[#00a884] rounded-full animate-typing-dot"></div>
+              <div className="w-1.5 h-1.5 bg-[#00a884] rounded-full animate-typing-dot [animation-delay:-0.15s]"></div>
+              <div className="w-1.5 h-1.5 bg-[#00a884] rounded-full animate-typing-dot [animation-delay:-0.3s]"></div>
             </div>
           </div>
         )}
