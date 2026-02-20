@@ -126,5 +126,32 @@
 <body class="bg-[#f8f9fa] dark:bg-slate-950 text-stone-900 dark:text-stone-100 select-none antialiased overflow-hidden">
   <div id="root"></div>
   <script type="module" src="index.tsx"></script>
+
+<!-- CHARIOW-->
+  <!-- Chariow Widget -->
+<div id="chariow-widget" data-product-id="prd_1x6smw"
+    data-store-domain="janngu.mychariow.shop"
+    data-style="tap"
+    data-border-style="rounded"
+    data-cta-width="xs"
+    data-cta-animation="shine"
+    data-locale="en"
+    data-primary-color="#ffcc00"
+    data-background-color="#FFFFFF"
+    data-custom-cta-text="Commencer aujourd'hui"></div>
+<script>
+(function() {
+  var script = document.createElement('script');
+  script.src = 'https://js.chariow.com/v1/widget.min.js';
+  script.async = true;
+  document.head.appendChild(script);
+
+  var link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://js.chariow.com/v1/widget.min.css';
+  document.head.appendChild(link);
+})();
+</script>
+  
 </body>
 </html>
